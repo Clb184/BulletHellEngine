@@ -88,6 +88,7 @@ static SQInteger Task_Constructor(HSQUIRRELVM v) {
 		sq_pushstring(v, _SC("____task"), -1);
 		pTask->main_thread = sq_newthread(v, top + 2 + 15);
 		pTask->is_delete = false;
+		pTask->active = true;
 		//PrintStack(v);
 		//sq_pushroottable(v2);
 		//sq_pushstring(v2, _SC("TaskInit"), -1);
@@ -110,8 +111,9 @@ static SQInteger Task_Constructor(HSQUIRRELVM v) {
 		sq_pushroottable(v);
 		sq_pushstring(v, _SC("____enm"), -1);
 		sq_get(v, -2);
+		sq_pushinteger(v, pTask->id);
 		sq_move(v, v, 1);
-		sq_arrayinsert(v, -2, pTask->id);
+		sq_set(v, -3);
 		sq_pop(v, 2);
 	}
 	return 0;
@@ -152,8 +154,9 @@ inline void MoveTask(HSQUIRRELVM v, Node<T>* pTask, CDoubleLinkedArrayList<T>* p
 			sq_pushroottable(v);
 			sq_pushstring(v, _SC("____enm"), -1);
 			sq_get(v, -2);
+			sq_pushinteger(v, pTask->id);
 			sq_pushnull(v);
-			sq_arrayinsert(v, -2, pTask->id);
+			sq_set(v, -3);
 			sq_pop(v, 2);
 			pList->DeleteFromIndex(pTask->id);
 			return;

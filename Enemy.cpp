@@ -42,11 +42,14 @@ void EnemyManager::Draw() {
 	Node<Enemy>* pInst;
 	Iterator<Enemy> it = *m_TaskList.GetBackIterator();
 	it.MoveFront();
+	//printf("begin\n");
+	//PrintStack(m_VM);
 	sq_pushroottable(m_VM);
 	sq_pushstring(m_VM, _SC("Texture"), -1);
 	sq_get(m_VM, -2);
 	sq_pushstring(m_VM, _SC("____enm"), -1);
 	sq_get(m_VM, -3);
+	//assert(m_TaskList.GetSize() < 10);
 	while ((pInst = it.GetData()) && pInst->active) {
 		if (pInst->is_delete) continue;
 		Enemy test = *pInst;
@@ -55,11 +58,16 @@ void EnemyManager::Draw() {
 		spr.SetSize(test.size);
 		spr.SetScale(test.scale);
 		spr.SetUV(test.uv);
+		//PrintStack(m_VM);
 		sq_pushinteger(m_VM, pInst->id);
+		//PrintStack(m_VM);
 		sq_get(m_VM, -2);
+		//PrintStack(m_VM);
 		sq_move(m_VM, m_VM, -3);
+		//PrintStack(m_VM);
 		sq_pushstring(m_VM, _SC("texture"), -1);
 		sq_get(m_VM, -3);
+		//PrintStack(m_VM);
 		if (SQTrue == sq_instanceof(m_VM)) {
 			sq_getinstanceup(m_VM, -1, (SQUserPointer*)(&tex), NULL);
 			tex->BindToContext(0, SHADER_RESOURCE_BIND_PS);
@@ -70,8 +78,11 @@ void EnemyManager::Draw() {
 		}
 		spr.Draw();
 		it.MoveFront();
+		//PrintStack(m_VM);
+		//printf("mid\n");
 		sq_pop(m_VM, 3);
 	}
+	//PrintStack(m_VM);
 	sq_pop(m_VM, 3);
 }
 
