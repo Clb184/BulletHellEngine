@@ -3,7 +3,7 @@
 #include "Task.h"
 #include "HitCalc.h"
 
-#define BULLET_MAX (2048 * 16)
+#define BULLET_MAX (2048)
 
 struct Bullet : TaskCollideableCircle {
 };

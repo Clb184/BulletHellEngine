@@ -191,6 +191,7 @@
     <ClInclude Include="Interpolator.h" />
     <ClInclude Include="LinkedArrayList.h" />
     <ClInclude Include="MemoryPool.h" />
+    <ClInclude Include="Player.h" />
     <ClInclude Include="SqHandlers.h" />
     <ClInclude Include="SquirrelMain.h" />
     <ClInclude Include="sq_linalg.h" />
