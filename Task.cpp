@@ -121,11 +121,6 @@ void TaskManager::Move() {
 	}
 }
 
-
-void TaskManager::Draw() {
-}
-
-
 Task2DManager::Task2DManager() :
 	m_TaskList(TASK2DMAX, &g_TaskDrawable2DPool)
 {

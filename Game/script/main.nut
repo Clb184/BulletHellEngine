@@ -8,8 +8,10 @@ function main(){
     local l = ____enm.len();
     while (1) {
         wait(10);
-        Enemy(testing, 100.0, 300.0, 70.0, tex);
-        Enemy(testing, 400.0, 300.0, 70.0, tex2);
+        for (local i = 0; i < l; i++) {
+            Enemy(testing, 50.0 + i * 0.5, 300.0, 70.0, tex);
+        }
+        //Enemy(testing, 400.0, 300.0, 70.0, tex2);
         //print("e: " + e + "\n");
         //e.Kill();
         wait(300);

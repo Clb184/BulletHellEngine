@@ -7,7 +7,6 @@ class CManagerBase {
 public:
 	virtual void Initialize() = 0;
 	virtual void Move() = 0;
-	virtual void Draw() = 0;
 	static void SetDeltaTime(float* pTime) { m_pDeltaTime = pTime; }
 	static void SetVM(HSQUIRRELVM v) { m_VM = v; }
 	static void SetTextureClass(const HSQOBJECT& obj) { m_TextureObj = obj; }

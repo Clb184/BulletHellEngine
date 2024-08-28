@@ -6,6 +6,7 @@
 #include "ClbLibMain.h"
 #include "Graphics.h"
 #include "CManagerBase.h"
+#include "CDrawableManager.h"
 #include "LinkedArrayList.h"
 #include "MemoryPool.h"
 
@@ -37,6 +38,7 @@ struct TaskDrawable2D : Task {
 	glm::vec2 scale = {1.0f, 1.0f};
 	float rotation = 0.0f;
 	glm::vec4 uv = { 0.0f, 0.0f, 1.0f, 1.0f };
+	uint32_t color = 0xffffffff;
 };
 
 struct TaskDrawable3D : Task {
@@ -206,13 +208,12 @@ public:
 
 	void Initialize();
 	void Move();
-	void Draw();
 
 private:
 	CDoubleLinkedArrayList<Task> m_TaskList;
 };
 
-class Task2DManager : public CManagerBase {
+class Task2DManager : public CDrawableManager {
 public:
 	Task2DManager();
 	~Task2DManager();

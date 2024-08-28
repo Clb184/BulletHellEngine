@@ -11,7 +11,7 @@ struct Enemy : TaskDrawable2D {
 
 extern CMemoryPool<Node<Enemy>> g_TaskEnemyPool;
 
-class EnemyManager : public CManagerBase {
+class EnemyManager : public CDrawableManager {
 public:
 	EnemyManager();
 	~EnemyManager();
@@ -22,6 +22,7 @@ public:
 	Node<Enemy>* CreateEnemy();
 private:
 	CDoubleLinkedArrayList<Enemy> m_TaskList;
+	Clb184::CTexture** m_ppTextures;
 };
 
 extern EnemyManager g_EnmManager;
