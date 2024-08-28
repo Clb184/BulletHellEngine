@@ -26,6 +26,7 @@ private:
 
 	TaskManager m_TaskManager;
 	Task2DManager m_Task2DManager;
+	Clb184::CMusicStream m_Music;
 	//EnemyManager m_EnemyManager;
 };
 

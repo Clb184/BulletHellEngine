@@ -1,13 +1,17 @@
 #include "GameMain.h"
 
 GameMain::GameMain() {
+	m_GlobalTime = 0.0;
 	m_VM = nullptr;
 	m_DeltaTime = 1.0f;
 	m_bRunOK = false;
 }
 
 GameMain::~GameMain() {
-	if (m_VM) delete m_VM;
+	if (m_VM) { 
+		sq_collectgarbage(m_VM);
+		sq_close(m_VM);
+	}
 }
 
 void GameMain::Initialize(const char* filename) {
@@ -19,9 +23,10 @@ void GameMain::Initialize(const char* filename) {
 	sq_newclosure(m_VM, &SQErrorFunction, 0);
 	sq_seterrorhandler(m_VM);
 	sq_setprintfunc(m_VM, PrintFn, PrintFn);
+	/*
 	sq_pushstring(m_VM, _SC("____enm"), -1);
 	sq_newarray(m_VM, ENEMY_MAX);
-	sq_newslot(m_VM, -3, SQFalse);
+	sq_newslot(m_VM, -3, SQFalse);*/
 	RegisterSQFunc(m_VM, PrintCallStack, "PrintCallStack");
 	RegisterEnemyClass(m_VM);
 	RegisterLinearAlgebraClass(m_VM);
@@ -42,8 +47,16 @@ void GameMain::Initialize(const char* filename) {
 
 	if (m_bRunOK = CompileSQScript(filename, m_VM)) {
 		CallNPSQFunc(m_VM, "main");
-		g_EnmManager.Initialize();
+		m_Music.Load("music/ex_3.ogg");
+		m_Music.SetLoop(true);
+		m_Music.Play(0.0f);
+
+		//Initialize managers
+		sq_pushroottable(m_VM);
 		CManagerBase::SetVM(m_VM);
+		CManagerBase::SetTextureClass(SQGetObjectByName(m_VM, _SC("Texture")));
+		g_EnmManager.Initialize();
+		sq_pop(m_VM, 1);
 	}
 }
 

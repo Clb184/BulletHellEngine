@@ -14,19 +14,22 @@ EnemyManager::~EnemyManager() {
 }
 
 void EnemyManager::Initialize() {
-
+	if (m_VM) {
+		sq_pushroottable(m_VM);
+		m_ArrayObj = SQCreateArray(m_VM, _SC("____enm"), ENEMY_MAX);
+		sq_pop(m_VM, 1);
+	}
 }
 
 
 void EnemyManager::Move() {
-	if (!m_TaskList.GetSize())
-		return;
+	if (!m_TaskList.GetSize() || !m_VM) return;
 
 	Node<Enemy>* pInst;
 	Iterator<Enemy> it = *m_TaskList.GetBackIterator();
 	it.MoveFront();
 	while ((pInst = it.GetData()) && pInst->active) {
-		Enemy test = *pInst;
+		//Enemy test = *pInst;
 		MoveTask(m_VM, pInst, &m_TaskList);
 
 		it.MoveFront();
@@ -34,21 +37,17 @@ void EnemyManager::Move() {
 }
 
 void EnemyManager::Draw() {
-	static Clb184::CTexture* tex = nullptr;
 	static Clb184::CD3DSprite spr;
-	if (!m_TaskList.GetSize())
-		return;
+	Clb184::CTexture* tex = nullptr;
+
+	if (!m_TaskList.GetSize() || !m_VM) return;
 
 	Node<Enemy>* pInst;
 	Iterator<Enemy> it = *m_TaskList.GetBackIterator();
 	it.MoveFront();
 	//printf("begin\n");
 	//PrintStack(m_VM);
-	sq_pushroottable(m_VM);
-	sq_pushstring(m_VM, _SC("Texture"), -1);
-	sq_get(m_VM, -2);
-	sq_pushstring(m_VM, _SC("____enm"), -1);
-	sq_get(m_VM, -3);
+	sq_pushobject(m_VM, m_ArrayObj);
 	//assert(m_TaskList.GetSize() < 10);
 	while ((pInst = it.GetData()) && pInst->active) {
 		if (pInst->is_delete) continue;
@@ -63,27 +62,24 @@ void EnemyManager::Draw() {
 		//PrintStack(m_VM);
 		sq_get(m_VM, -2);
 		//PrintStack(m_VM);
-		sq_move(m_VM, m_VM, -3);
+		sq_pushobject(m_VM, m_TextureObj);
 		//PrintStack(m_VM);
+
 		sq_pushstring(m_VM, _SC("texture"), -1);
 		sq_get(m_VM, -3);
-		//PrintStack(m_VM);
+		PrintStack(m_VM);
 		if (SQTrue == sq_instanceof(m_VM)) {
 			sq_getinstanceup(m_VM, -1, (SQUserPointer*)(&tex), NULL);
 			tex->BindToContext(0, SHADER_RESOURCE_BIND_PS);
+			spr.Draw();
 		}
-		else {
-			ID3D11ShaderResourceView* p = nullptr;
-			Clb184::g_pContext->PSSetShaderResources(0, 1, &p);
-		}
-		spr.Draw();
 		it.MoveFront();
 		//PrintStack(m_VM);
 		//printf("mid\n");
 		sq_pop(m_VM, 3);
 	}
 	//PrintStack(m_VM);
-	sq_pop(m_VM, 3);
+	sq_pop(m_VM, 1);
 }
 
 Node<Enemy>* EnemyManager::CreateEnemy() {

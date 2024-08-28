@@ -20,6 +20,27 @@ void SQCompilerErrorHandler(HSQUIRRELVM vm, const SQChar* Desc, const SQChar* Sr
 }
 
 
+HSQOBJECT SQCreateArray(HSQUIRRELVM v, const SQChar* arrayname, int num_elements) {
+	HSQOBJECT ret = {};
+	sq_pushstring(v, arrayname, -1);
+	sq_newarray(v, num_elements);
+	sq_newslot(v, -3, SQFalse);
+	sq_pushstring(v, arrayname, -1);
+	sq_get(v, -2);
+	sq_getstackobj(v, -1, &ret);
+	sq_pop(v, 1);
+	return ret;
+}
+
+HSQOBJECT SQGetObjectByName(HSQUIRRELVM v, const SQChar* name) {
+	HSQOBJECT ret = {};
+	sq_pushstring(v, name, -1);
+	sq_get(v, -2);
+	sq_getstackobj(v, -1, &ret);
+	sq_pop(v, 1);
+	return ret;
+}
+
 SQInteger SQErrorFunction(HSQUIRRELVM vm) {
 	if (sq_gettop(vm) >= 1) {
 		SQStackInfos sqstack;
@@ -29,7 +50,7 @@ SQInteger SQErrorFunction(HSQUIRRELVM vm) {
 			msg =
 				"Error: \"" + std::string(error_message) + "\"\n" +
 				"---------------------------------------------------\n" +
-				"                       Stack                       \n" +
+				"                       STACK                       \n" +
 				"---------------------------------------------------\n" +
 				">>>";
 			int i = 1;
@@ -38,7 +59,7 @@ SQInteger SQErrorFunction(HSQUIRRELVM vm) {
 					"@" + std::string(sqstack.source) + ":" + std::to_string(sqstack.line) + "\n";
 				i++;
 			}
-			PrintStack(vm);
+			//PrintStack(vm);
 			MessageBoxA(NULL, msg.c_str(), "Squirrel Runtime Error", MB_ICONEXCLAMATION);
 		}
 	}

@@ -11,16 +11,13 @@ wrl::ComPtr<ID3D11DepthStencilState> m_Draw2DState;
 int WINAPI wWinMain(HINSTANCE current, HINSTANCE prev, LPWSTR args, int cmd) {
 
 
-	GameMain* pTasks = new GameMain();
+	GameMain g_GameMain;
 	
 	HWND Window = 0;
 	HRESULT HR;
 	MSG Msg;
 	Clb184::CD3DWindow window;
 	Clb184::CFrameLimiter frame_limit;
-
-	std::wstring num;
-	std::wstring num2;
 
 #ifdef DEBUG
 	static Clb184::CKeyboard kbd;
@@ -74,18 +71,36 @@ int WINAPI wWinMain(HINSTANCE current, HINSTANCE prev, LPWSTR args, int cmd) {
 	sampler.SetSamplerKind(SAMPLER_PIXEL);
 	sampler.CreateSampler();
 	sampler.BindToContext(0, SHADER_RESOURCE_BIND_PS);
+
 	Clb184::CText text;
 	text.Setup(1024, 1024);
 	text.SetText("Idiots are thinking...");
 	text.SetFont(L"Consolas");
 	text.SetSize(64.0f);
 	text.Update();
+
 	Clb184::CD3DSprite spritetext;
 	spritetext.SetPos({ 320.0f, 400.0f });
 	spritetext.SetSize({ 512.0f, 512.0f });
+
+	Clb184::CText fps;
+	fps.Setup(256, 256);
+	fps.SetText("none");
+	fps.SetFont(L"Consolas");
+	fps.SetSize(18.0f);
+	fps.SetTextAnchor(Clb184::CText::ANCHOR_RIGHT);
+	fps.Update();
+	const float onetfs = 1.0f / 256.0f;
+
+	Clb184::CD3DSprite fpssprite;
+	fpssprite.SetPos({640.0, 480.0});
+	fpssprite.SetCenter(2, 2);
+	fpssprite.SetSize({18 * 8, 18});
+	fpssprite.SetUV(glm::vec4(256.0f - 18.0f * 8.0f, 0.0f, 256.0f, 18.0f) * onetfs);
+
 	float f = 0;
 	bool sign = true;
-	pTasks->Initialize("script/main.nut");
+	g_GameMain.Initialize("script/main.nut");
 	while (1) {
 		if (PeekMessage(&Msg, NULL, 0, 0, PM_NOREMOVE)) {
 			if (!GetMessage(&Msg, NULL, 0, 0)) {
@@ -98,14 +113,14 @@ int WINAPI wWinMain(HINSTANCE current, HINSTANCE prev, LPWSTR args, int cmd) {
 			if(frame_limit.IsNeedUpdate()) {
 				window.ClearWindow();
 				window.BindTargetView();
-				pTasks->Move();
+				g_GameMain.Move();
 
 				Clb184::g_pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 				Clb184::CDefault2DShader::GetShaderInstance().BindVertexShader();
 				Clb184::CDefault2DShader::GetShaderInstance().BindPixelShader();
 				Clb184::g_pContext->OMSetDepthStencilState(m_Draw2DState.Get(), 0);
 
-				pTasks->Draw();
+				g_GameMain.Draw();
 				double res = glm::mix((sign) ? -3.1415926 : 3.1415926, (sign) ? 3.1415926 : -3.1415926, glm::smoothstep(0.0, 1.0, fmod((double)f, 90.0) / 90.0));
 				sprite.SetRotation(res);
 				sprite.SetPos({ 320.0f + res * 40.0f, 240.0f });
@@ -127,21 +142,17 @@ int WINAPI wWinMain(HINSTANCE current, HINSTANCE prev, LPWSTR args, int cmd) {
 					HR = pDXDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_ALL);
 #endif
 
-				if (frame_limit.GetMeanFPS() != INFINITY) {
-					num = std::to_wstring(frame_limit.GetMeanFPS());
-					num2 = L"";
-					for (int i = 0; ; i++) {
-						num2 += num.at(i);
-						if (num.at(i) == '.') {
-							num2 += num.at(i + 1);
-							num2 += num.at(i + 2);
-							break;
-						}
-					}
-				}
-				else {
-					num2 = L"INF ";
-				}
+				char numbuf[8] = "";
+				sprintf_s(numbuf, "%.2f", frame_limit.GetMeanFPS());
+				Clb184::g_pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+				Clb184::CDefault2DShader::GetShaderInstance().BindVertexShader();
+				Clb184::CDefault2DShader::GetShaderInstance().BindPixelShader();
+				Clb184::g_pContext->OMSetDepthStencilState(m_Draw2DState.Get(), 0);
+				fps.SetText(numbuf);
+				fps.BindToContext(0, SHADER_RESOURCE_BIND_PS);
+				fps.Update();
+				fpssprite.Draw();
+
 				HR = Clb184::g_pSwapChain->Present(0, 0);
 				switch (HR) {
 				case DXGI_ERROR_DEVICE_REMOVED:
@@ -156,7 +167,6 @@ int WINAPI wWinMain(HINSTANCE current, HINSTANCE prev, LPWSTR args, int cmd) {
 			WaitMessage();
 		}
 	}
-
 #ifdef DEBUG
 	HR = pDXDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_ALL);
 #endif // _DEBUG

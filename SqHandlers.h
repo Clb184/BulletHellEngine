@@ -61,8 +61,10 @@ typedef std::vector<SquirrelFunc> SQClassFunctions;
 
 //Executes a function with no parameters
 inline void CallNPSQFunc(HSQUIRRELVM v, const char* funcName);
-
-
+//Must push the roottable previously for use
+HSQOBJECT SQCreateArray(HSQUIRRELVM v, const SQChar* arrayname, int num_elements);
+//Gets an object by name, push origin before (can be root table, array, table, etc...)
+HSQOBJECT SQGetObjectByName(HSQUIRRELVM v, const SQChar* name);
 
 
 //Implementation
@@ -89,6 +91,7 @@ void CallNPSQFunc(HSQUIRRELVM v, const char* funcName) {
 	sq_pop(v, 2);
 #endif
 }
+
 
 inline SQObjectType SQGetType(HSQUIRRELVM v, SQInteger index) {
 	return sq_gettype(v, index);
@@ -122,11 +125,11 @@ inline void PrintStack(HSQUIRRELVM v) {
 		case SQObjectType::OT_NULL:
 			printf("NULL"); break;
 		case SQObjectType::OT_INTEGER:
-			printf("INTEGER %d", obj._unVal.nInteger); break;
+			printf("INTEGER %d", static_cast<int>(obj._unVal.nInteger)); break;
 		case SQObjectType::OT_FLOAT:
 			printf("FLOAT %f", obj._unVal.fFloat); break;
 		case SQObjectType::OT_BOOL:
-			printf("BOOL %d", obj._unVal.nInteger); break;
+			printf("BOOL %d", static_cast<int>(obj._unVal.nInteger)); break;
 		case SQObjectType::OT_STRING:
 			sq_getstring(v, -i, &pStr);
 			printf("STRING %s", pStr); break;
@@ -139,23 +142,23 @@ inline void PrintStack(HSQUIRRELVM v) {
 		case SQObjectType::OT_CLOSURE:
 			printf("CLOSURE %p", obj._unVal.pClosure); break;
 		case SQObjectType::OT_NATIVECLOSURE:
-			printf("NATIVECLOSURE %p"); break;
+			printf("NATIVECLOSURE %p", obj._unVal.pNativeClosure); break;
 		case SQObjectType::OT_GENERATOR:
-			printf("GENERATOR %p"); break;
+			printf("GENERATOR %p", obj._unVal.pGenerator); break;
 		case SQObjectType::OT_USERPOINTER:
-			printf("USERPOINTER"); break;
+			printf("USERPOINTER %p", obj._unVal.pUserPointer); break;
 		case SQObjectType::OT_THREAD:
 			printf("THREAD %p", obj._unVal.pThread); break;
 		case SQObjectType::OT_FUNCPROTO:
-			printf("FUNCPROTO"); break;
+			printf("FUNCPROTO %p", obj._unVal.pFunctionProto); break;
 		case SQObjectType::OT_CLASS:
 			printf("CLASS %p", obj._unVal.pClass); break;
 		case SQObjectType::OT_INSTANCE:
 			printf("INSTANCE %p", obj._unVal.pInstance); break;
 		case SQObjectType::OT_WEAKREF:
-			printf("WEAKREF"); break;
+			printf("WEAKREF %p", obj._unVal.pWeakRef); break;
 		case SQObjectType::OT_OUTER:
-			printf("OUTER"); break;
+			printf("OUTER %p", obj._unVal.pOuter); break;
 		}
 		printf("\n");
 	}

@@ -169,6 +169,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Batcher.cpp" />
+    <ClCompile Include="CDrawableManager.cpp" />
     <ClCompile Include="CManagerBase.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="GameMain.cpp" />
@@ -180,10 +181,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Batcher.h" />
+    <ClInclude Include="CDrawableManager.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="GameMain.h" />
     <ClInclude Include="Graphics.h" />
     <ClInclude Include="CManagerBase.h" />
+    <ClInclude Include="Interpolator.h" />
     <ClInclude Include="LinkedArrayList.h" />
     <ClInclude Include="MemoryPool.h" />
     <ClInclude Include="SqHandlers.h" />

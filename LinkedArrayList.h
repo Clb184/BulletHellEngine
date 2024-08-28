@@ -298,12 +298,12 @@ Node<T>* CDoubleLinkedArrayList<T>::FindFreeBlock(){
         }
     } else {
         size_t times = ListSize >> 1;
-        for(size_t i = 0; i < times; i++, pRight--, pLeft++){
+        for(size_t i = 0; i < ListSize; i++, pLeft++){
             if(!pLeft->active)
                 return pLeft;
 
-            if(!pRight->active)
-                return pRight;
+            //if(!pRight->active)
+                //return pRight;
             
         }
     }

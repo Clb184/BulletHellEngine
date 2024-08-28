@@ -361,3 +361,11 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+#Ignore certain resource files
+Game/music/
+Game/graph/
+Game/sound/
+Game/bg/
+*.clip
+*.exe

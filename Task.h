@@ -31,11 +31,12 @@ struct Task {
 };
 
 struct TaskDrawable2D : Task {
+	HSQOBJECT texture_handle;
 	glm::vec2 pos;
-	glm::vec2 size;
-	glm::vec2 scale;
-	float rotation;
-	glm::vec4 uv;
+	glm::vec2 size = {32.0f, 32.0f};
+	glm::vec2 scale = {1.0f, 1.0f};
+	float rotation = 0.0f;
+	glm::vec4 uv = { 0.0f, 0.0f, 1.0f, 1.0f };
 };
 
 struct TaskDrawable3D : Task {
@@ -68,7 +69,35 @@ static SQInteger ListRelease(SQUserPointer pData, SQInteger) {
 	return SQ_OK;
 }
 
-template <class T, Node<T>* (*generator)(), SQRELEASEHOOK des>
+inline bool TaskMemberSetup(HSQUIRRELVM v) {
+	bool member_set = true;
+	sq_pushstring(v, _SC("____task"), -1);
+	sq_pushnull(v);
+	member_set &= SQ_SUCCEEDED(sq_newslot(v, -3, SQFalse));
+	return member_set;
+}
+
+inline bool Task2DMemberSetup(HSQUIRRELVM v) {
+	bool member_set = TaskMemberSetup(v);
+	sq_pushstring(v, _SC("texture"), -1);
+	sq_pushnull(v);
+	member_set &= SQ_SUCCEEDED(sq_newslot(v, -3, SQFalse));
+	return member_set;
+}
+
+static void Task2DInitialize(HSQUIRRELVM v, Node<TaskDrawable2D>* pTask) {
+	pTask->texture_handle = SQGetObjectByName(v, _SC("texture"));
+}
+
+/*
+Setup a task, avoiding inheritance or at least trying so
+On each class register for tasks, you enter the following:
+-The class (Well, struct) for the Task
+-The class generator
+-The list setup (You need to push the root table and manage yourself)
+-The member initializer (and caching? if you want, in this case, the instance is pushed before)
+*/
+template <class T, Node<T>* (*generator)(), void (*list_setup)(HSQUIRRELVM, Node<T>*), void (*initializer)(HSQUIRRELVM, Node<T>*)>
 static SQInteger Task_Constructor(HSQUIRRELVM v) {
 	union {
 		SQUserPointer pData;
@@ -83,7 +112,7 @@ static SQInteger Task_Constructor(HSQUIRRELVM v) {
 		if (!pTask) return 0;
 		sq_getstackobj(v, 1, &obj);
 		sq_setinstanceup(v, 1, pData);
-		sq_setreleasehook(v, 1, des);
+		sq_setreleasehook(v, 1, DummyRelease);
 		numparams = top - 2;
 		sq_pushstring(v, _SC("____task"), -1);
 		pTask->main_thread = sq_newthread(v, top + 2 + 15);
@@ -101,20 +130,13 @@ static SQInteger Task_Constructor(HSQUIRRELVM v) {
 		while (i++ < numparams) {
 			sq_move(pTask->main_thread, v, 2 + i);
 		}
-		//sq_move(v2, v, 1);
-		//PrintStack(pTask->main_thread);
 		sq_call(pTask->main_thread, numparams + 1, SQFalse, SQTrue);
-		//sq_call(v2, numparams + 1 + 1 + 1, SQFalse, SQTrue);
-		//pTask->main_thread = std::move(v2);
 		sq_set(v, 1);
-		//sq_pop(v, 1);
-		sq_pushroottable(v);
-		sq_pushstring(v, _SC("____enm"), -1);
-		sq_get(v, -2);
-		sq_pushinteger(v, pTask->id);
+		list_setup(v, pTask);
 		sq_move(v, v, 1);
-		sq_set(v, -3);
-		sq_pop(v, 2);
+		initializer(v, pTask);
+		sq_pop(v, 1);
+
 	}
 	return 0;
 }
