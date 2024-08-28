@@ -17,7 +17,6 @@ SQInteger Task_Kill(HSQUIRRELVM v) {
 		pTask->is_delete = true;
 		if(v == pTask->main_thread)
 			return sq_suspendvm(v);
-		//if(sq_getvmstate(pTask->main_thread) == SQ_VMSTATE_RUNNING) sq_suspendvm(pTask->main_thread);
 	}
 	return 0;
 }
@@ -92,10 +91,20 @@ SQInteger Task2D_SetUV(HSQUIRRELVM v) {
 	return 0;
 }
 
+SQInteger Collision_SetRadius(HSQUIRRELVM v) {
+	union {
+		TaskCollideableCircle* pHitbox;
+		SQUserPointer pData;
+	};
+	sq_getinstanceup(v, -2, &pData, NULL);
+	sq_getfloat(v, -1, &pHitbox->co_shape.r);
+	return 0;
+}
+
 
 
 TaskManager::TaskManager() :
-m_TaskList(512, &g_TaskPool) {
+m_TaskList(TASK_MAX, &g_TaskPool) {
 
 }
 
@@ -103,8 +112,10 @@ TaskManager::~TaskManager() {
 
 }
 
-void TaskManager::Initialize()
-{
+void TaskManager::Initialize() {
+	if (m_VM) {
+		m_ArrayObj = SQCreateArray(m_VM, _SC("____tsk"), TASK_MAX);
+	}
 }
 
 void TaskManager::Move() {
@@ -116,13 +127,13 @@ void TaskManager::Move() {
 	it.MoveFront();
 	while ((pInst = it.GetData()) && pInst->active) {
 		Task test = *pInst;
-		MoveTask(m_VM, pInst, &m_TaskList);
+		MoveTask(m_VM, pInst, &m_TaskList, m_ArrayObj);
 		it.MoveFront();
 	}
 }
 
 Task2DManager::Task2DManager() :
-	m_TaskList(TASK2DMAX, &g_TaskDrawable2DPool)
+	m_TaskList(TASK2D_MAX, &g_TaskDrawable2DPool)
 {
 
 }
@@ -133,7 +144,9 @@ Task2DManager::~Task2DManager()
 }
 
 void Task2DManager::Initialize() {
-
+	if (m_VM) {
+		m_ArrayObj = SQCreateArray(m_VM, _SC("____tsk"), TASK2D_MAX);
+	}
 }
 
 void Task2DManager::Move() {
@@ -145,7 +158,7 @@ void Task2DManager::Move() {
 	it.MoveFront();
 	while ((pInst = it.GetData()) && pInst->active) {
 		TaskDrawable2D test = *pInst;
-		MoveTask(m_VM, pInst, &m_TaskList);
+		MoveTask(m_VM, pInst, &m_TaskList, m_ArrayObj);
 		it.MoveFront();
 	}
 }

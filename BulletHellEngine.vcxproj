@@ -169,6 +169,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Batcher.cpp" />
+    <ClCompile Include="Bullet.cpp" />
     <ClCompile Include="CDrawableManager.cpp" />
     <ClCompile Include="CManagerBase.cpp" />
     <ClCompile Include="Enemy.cpp" />
@@ -181,6 +182,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Batcher.h" />
+    <ClInclude Include="Bullet.h" />
     <ClInclude Include="CDrawableManager.h" />
     <ClInclude Include="Enemy.h" />
     <ClInclude Include="GameMain.h" />

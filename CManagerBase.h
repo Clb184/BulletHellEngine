@@ -9,6 +9,7 @@ public:
 	virtual void Move() = 0;
 	static void SetDeltaTime(float* pTime) { m_pDeltaTime = pTime; }
 	static void SetVM(HSQUIRRELVM v) { m_VM = v; }
+	static HSQUIRRELVM GetVM() { return m_VM; }
 	static void SetTextureClass(const HSQOBJECT& obj) { m_TextureObj = obj; }
 protected:
 	static float* m_pDeltaTime;

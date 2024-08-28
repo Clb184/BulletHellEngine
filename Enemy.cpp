@@ -31,7 +31,7 @@ void EnemyManager::Move() {
 	it.MoveFront();
 	while ((pInst = it.GetData()) && pInst->active) {
 		//Enemy test = *pInst;
-		MoveTask(m_VM, pInst, &m_TaskList);
+		MoveTask(m_VM, pInst, &m_TaskList, m_ArrayObj);
 
 		it.MoveFront();
 	}

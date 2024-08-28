@@ -29,6 +29,7 @@ void GameMain::Initialize(const char* filename) {
 	sq_newslot(m_VM, -3, SQFalse);*/
 	RegisterSQFunc(m_VM, PrintCallStack, "PrintCallStack");
 	RegisterEnemyClass(m_VM);
+	RegisterBulletClass(m_VM);
 	RegisterLinearAlgebraClass(m_VM);
 	RegisterTextureClass(m_VM);
 	sq_pop(m_VM, 1);
@@ -46,17 +47,20 @@ void GameMain::Initialize(const char* filename) {
 		"}", m_VM);
 
 	if (m_bRunOK = CompileSQScript(filename, m_VM)) {
-		CallNPSQFunc(m_VM, "main");
-		m_Music.Load("music/ex_3.ogg");
-		m_Music.SetLoop(true);
-		m_Music.Play(0.0f);
-
 		//Initialize managers
 		sq_pushroottable(m_VM);
 		CManagerBase::SetVM(m_VM);
 		CManagerBase::SetTextureClass(SQGetObjectByName(m_VM, _SC("Texture")));
 		g_EnmManager.Initialize();
+		g_BulletManager.Initialize();
 		sq_pop(m_VM, 1);
+
+		//Finally, initialize script
+		CallNPSQFunc(m_VM, "main");
+		m_Music.Load("music/ex_3.ogg");
+		m_Music.SetLoop(true);
+		m_Music.Play(0.0f);
+
 	}
 }
 
@@ -69,6 +73,7 @@ void GameMain::Move() {
 		m_TaskManager.Move();
 		m_Task2DManager.Move();
 		g_EnmManager.Move();
+		g_BulletManager.Move();
 	}
 }
 
@@ -76,6 +81,7 @@ void GameMain::Draw() {
 	if (m_bRunOK) {
 		m_Task2DManager.Draw();
 		g_EnmManager.Draw();
+		g_BulletManager.Draw();
 	}
 	DrawDebug();
 }

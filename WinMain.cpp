@@ -115,13 +115,13 @@ int WINAPI wWinMain(HINSTANCE current, HINSTANCE prev, LPWSTR args, int cmd) {
 				window.BindTargetView();
 				g_GameMain.Move();
 
-				Clb184::g_pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 				Clb184::CDefault2DShader::GetShaderInstance().BindVertexShader();
 				Clb184::CDefault2DShader::GetShaderInstance().BindPixelShader();
 				Clb184::g_pContext->OMSetDepthStencilState(m_Draw2DState.Get(), 0);
 
 				g_GameMain.Draw();
 				double res = glm::mix((sign) ? -3.1415926 : 3.1415926, (sign) ? 3.1415926 : -3.1415926, glm::smoothstep(0.0, 1.0, fmod((double)f, 90.0) / 90.0));
+				Clb184::g_pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 				sprite.SetRotation(res);
 				sprite.SetPos({ 320.0f + res * 40.0f, 240.0f });
 				tex.BindToContext(0, SHADER_RESOURCE_BIND_PS);

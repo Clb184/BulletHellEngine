@@ -4,6 +4,7 @@
 #include "CManagerBase.h"
 #include "Task.h"
 #include "Enemy.h"
+#include "Bullet.h"
 #include "Tex.h"
 #include "SqHandlers.h"
 

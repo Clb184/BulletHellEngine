@@ -9,8 +9,10 @@
 #include "CDrawableManager.h"
 #include "LinkedArrayList.h"
 #include "MemoryPool.h"
+#include "HitCalc.h"
 
-#define TASK2DMAX (256)
+#define TASK_MAX (512)
+#define TASK2D_MAX (256)
 
 struct VMInstance {
 	HSQUIRRELVM thread = nullptr;
@@ -46,28 +48,11 @@ struct TaskDrawable3D : Task {
 	glm::mat4 transform;
 };
 
-static SQInteger TaskInit(HSQUIRRELVM v) {
-	int t = sq_gettop(v);
-	int numparams = t - 3;
-	PrintStack(v);
-	sq_bindenv(v, 2);
-	sq_pushroottable(v);
-	PrintStack(v);
-	int i = 0;
-	while (i++ < numparams) {
-		sq_move(v, v, 2 + i);
-	}
-	PrintStack(v);
-	sq_call(v, numparams + 1, SQFalse, SQTrue);
-	return 0;
-}
+struct TaskCollideableCircle : TaskDrawable2D {
+	CollissionCircle co_shape;
+};
 
 static SQInteger DummyRelease(SQUserPointer, SQInteger) {
-	return SQ_OK;
-}
-
-template<class T>
-static SQInteger ListRelease(SQUserPointer pData, SQInteger) {
 	return SQ_OK;
 }
 
@@ -88,7 +73,7 @@ inline bool Task2DMemberSetup(HSQUIRRELVM v) {
 }
 
 static void Task2DInitialize(HSQUIRRELVM v, Node<TaskDrawable2D>* pTask) {
-	pTask->texture_handle = SQGetObjectByName(v, _SC("texture"));
+	//pTask->texture_handle = SQGetObjectByName(v, _SC("texture"));
 }
 
 /*
@@ -107,12 +92,11 @@ static SQInteger Task_Constructor(HSQUIRRELVM v) {
 	};
 	SQInteger top = sq_gettop(v);
 	SQInteger numparams;
-	HSQOBJECT obj;
+	static HSQUIRRELVM mainv = CManagerBase::GetVM();
 
 	if (top >= 2 && (sq_gettype(v, 2) == OT_CLOSURE)) {
 		pTask = generator();
 		if (!pTask) return 0;
-		sq_getstackobj(v, 1, &obj);
 		sq_setinstanceup(v, 1, pData);
 		sq_setreleasehook(v, 1, DummyRelease);
 		numparams = top - 2;
@@ -155,8 +139,10 @@ SQInteger Task2D_SetScale(HSQUIRRELVM v);
 SQInteger Task2D_SetRotation(HSQUIRRELVM v);
 SQInteger Task2D_SetUV(HSQUIRRELVM v);
 
+SQInteger Collision_SetRadius(HSQUIRRELVM v);
+
 template <class T>
-inline void MoveTask(HSQUIRRELVM v, Node<T>* pTask, CDoubleLinkedArrayList<T>* pList) {
+inline void MoveTask(HSQUIRRELVM v, Node<T>* pTask, CDoubleLinkedArrayList<T>* pList, HSQOBJECT arrayobj) {
 	bool ret = false;
 	if (pTask->main_thread && 0) {
 		if (!pTask->is_maincreated) {
@@ -176,8 +162,7 @@ inline void MoveTask(HSQUIRRELVM v, Node<T>* pTask, CDoubleLinkedArrayList<T>* p
 		if (sq_getvmstate(pTask->main_thread) == SQ_VMSTATE_IDLE || pTask->is_delete) {
 			//pTask->main_thread = nullptr;
 			sq_pushroottable(v);
-			sq_pushstring(v, _SC("____enm"), -1);
-			sq_get(v, -2);
+			sq_pushobject(v, arrayobj);
 			sq_pushinteger(v, pTask->id);
 			sq_pushnull(v);
 			sq_set(v, -3);
