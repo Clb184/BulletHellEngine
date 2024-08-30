@@ -17,7 +17,7 @@ Player::Player() {
 }
 
 Player::~Player() {
-
+	if (m_VM) { sq_close(m_VM); }
 }
 
 void Player::Initialize(const SQChar* fname) {
