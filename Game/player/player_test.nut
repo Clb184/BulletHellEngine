@@ -3,9 +3,10 @@ morgan_idle <- vec4t(0.0 * MORGAN_UNIT, 0.0, (160.0) * MORGAN_UNIT, (180.0) * MO
 morgan_tex <- Texture("graph/morgan_pl.tga");
 
 function main() {
-    local start = vec2t(320.0, 500.0);
+    local start = vec2t(0.0, 500.0);
     local y = 500.0;
     player.texture = morgan_tex;
+    player.SetMutekiTime(200);
     player.SetColor(0xffffffff);
     player.SetSize(vec2t(56.88, 64.0));
     player.SetRadius(24.0);

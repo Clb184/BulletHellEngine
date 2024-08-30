@@ -6,7 +6,6 @@
 #include <windows.h>
 
 wrl::ComPtr<ID3D11DepthStencilState> m_Draw3DState;
-wrl::ComPtr<ID3D11DepthStencilState> m_Draw2DState;
 
 #pragma comment(lib, "xinput.lib")
 
@@ -52,14 +51,6 @@ int WINAPI wWinMain(HINSTANCE current, HINSTANCE prev, LPWSTR args, int cmd) {
 
 	HR = Clb184::g_pD3D11Device->CreateDepthStencilState(&depthd, &m_Draw3DState);
 
-	D3D11_DEPTH_STENCIL_DESC depthd2 = {};
-	depthd2.DepthEnable = FALSE;
-	depthd2.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
-	depthd2.DepthFunc = D3D11_COMPARISON_ALWAYS;
-	depthd2.StencilEnable = FALSE;
-	depthd2.StencilWriteMask = 0;
-
-	HR = Clb184::g_pD3D11Device->CreateDepthStencilState(&depthd2, &m_Draw2DState);
 
 	Clb184::CTexture tex;
 	tex.LoadTextureFromFile("graph/ball.tga");
@@ -103,6 +94,7 @@ int WINAPI wWinMain(HINSTANCE current, HINSTANCE prev, LPWSTR args, int cmd) {
 	bool sign = true;
 	Clb184::g_pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	std::thread __loading([&]() {
+		g_GameMain.SetPlayerScript("player/player_test.nut");
 		g_GameMain.Initialize("script/main.nut");
 		});
 	bool not_init = false;
@@ -120,7 +112,6 @@ int WINAPI wWinMain(HINSTANCE current, HINSTANCE prev, LPWSTR args, int cmd) {
 				window.BindTargetView();
 				Clb184::CDefault2DShader::GetShaderInstance().BindVertexShader();
 				Clb184::CDefault2DShader::GetShaderInstance().BindPixelShader();
-				Clb184::g_pContext->OMSetDepthStencilState(m_Draw2DState.Get(), 0);
 				if (g_GameMain.IsInitialized() && !not_init) {
 					__loading.join();
 					not_init = true;
@@ -142,11 +133,12 @@ int WINAPI wWinMain(HINSTANCE current, HINSTANCE prev, LPWSTR args, int cmd) {
 #endif
 
 				char numbuf[8] = "";
+				D3D11_RECT rc = {0.0, 0.0, 640.0, 480.0};
 				sprintf_s(numbuf, "%.2f", frame_limit.GetMeanFPS());
+				Clb184::g_pContext->RSSetScissorRects(1, &rc);
 				Clb184::g_pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 				Clb184::CDefault2DShader::GetShaderInstance().BindVertexShader();
 				Clb184::CDefault2DShader::GetShaderInstance().BindPixelShader();
-				Clb184::g_pContext->OMSetDepthStencilState(m_Draw2DState.Get(), 0);
 				fps.SetText(numbuf);
 				fps.BindToContext(0, SHADER_RESOURCE_BIND_PS);
 				fps.Update();

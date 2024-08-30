@@ -4,23 +4,34 @@ Player g_Player;
 
 Player::Player() {
 	m_VM = nullptr;
-	ZeroMemory(&m_GamePadState, sizeof(XINPUT_STATE));
 	m_bRunOK = false;
-	size = { 24.0f, 24.0f };
+	m_TextureObj = {};
 	co_shape.r = 10.0f;
-	uv = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
-	//size = { 56.88, 64.0 };
-	//co_shape.r = 24.0f;
-	//uv = glm::vec4(0.0f, 0.0f, 160.0f, 180.0f) / 1024.0f;
-	pos = {0.0f, 0.0f};
 	m_bEnableMove = true;
+	m_IsDead = false;
+	m_IsInvincible = false;
+	m_MutekiTime = 0;
+	m_WaitNextLife = 0;
+	m_bDebugDrawEnable = true;
 }
 
 Player::~Player() {
-	if (m_VM) { sq_close(m_VM); }
+	if (m_VM) {
+		sq_close(m_VM);
+		m_VM = nullptr;
+	}
 }
 
 void Player::Initialize(const SQChar* fname) {
+	if (m_VM) {
+		sq_close(m_VM);
+		m_VM = nullptr;
+		co_shape.r = 10.0f;
+		m_bEnableMove = true;
+		m_IsDead = false;
+		m_MutekiTime = 0;
+		m_WaitNextLife = 0;
+	}
 	m_VM = sq_open(512);
 	sq_pushroottable(m_VM);
 	bool math_init = SQ_SUCCEEDED(sqstd_register_mathlib(m_VM));
@@ -29,10 +40,6 @@ void Player::Initialize(const SQChar* fname) {
 	sq_newclosure(m_VM, &SQErrorFunction, 0);
 	sq_seterrorhandler(m_VM);
 	sq_setprintfunc(m_VM, PrintFn, PrintFn);
-	/*
-	sq_pushstring(m_VM, _SC("____enm"), -1);
-	sq_newarray(m_VM, ENEMY_MAX);
-	sq_newslot(m_VM, -3, SQFalse);*/
 	RegisterSQFunc(m_VM, PrintCallStack, "PrintCallStack");
 	RegisterLinearAlgebraClass(m_VM);
 	RegisterTextureClass(m_VM);
@@ -62,6 +69,7 @@ void Player::Initialize(const SQChar* fname) {
 		RegisterSQFunc(m_VM, Player_SetUV, _SC("SetUV"));
 		RegisterSQFunc(m_VM, Player_SetColor, _SC("SetColor"));
 		RegisterSQFunc(m_VM, Player_SetRadius, _SC("SetRadius"));
+		RegisterSQFunc(m_VM, Player_SetMutekiTime, _SC("SetMutekiTime"));
 		RegisterSQFunc(m_VM, Player_EnableMove, _SC("EnableMove"));
 		sq_pushstring(m_VM, _SC("texture"), -1);
 		sq_pushnull(m_VM);
@@ -82,6 +90,16 @@ void Player::Initialize(const SQChar* fname) {
 		m_PlayerTexture.CreateEmptyTexture(256, 256, 0xffffffff);
 		//Finally, initialize script
 		CallNPSQFunc(m_VM, "main");
+		constexpr float delta = 3.14159 / 8.0;
+		float ang = 0.0f;
+		for (int i = 0; i < 16; i++) {
+			m_Points[i] = { cos(ang), sin(ang) };
+			ang += delta;
+		}
+		m_Points[16] = m_Points[0];
+		m_PrimBuffer.SetStrideInfo(sizeof(Clb184::Point2D));
+		m_PrimBuffer.Initialize(nullptr, sizeof(Clb184::Point2D) * 17, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+
 	}
 }
 
@@ -198,6 +216,8 @@ void Player::Draw() {
 		sq_get(m_VM, -3);
 		if (SQTrue == sq_instanceof(m_VM)) {
 			sq_getinstanceup(m_VM, -1, (SQUserPointer*)(&pTexture), NULL);
+			Clb184::CDefault2DShader::GetShaderInstance().BindVertexShader();
+			Clb184::CDefault2DShader::GetShaderInstance().BindPixelShader();
 			pTexture->BindToContext(0, SHADER_RESOURCE_BIND_PS);
 			m_VBuffer.BindToContext(0, 0);
 			Clb184::g_pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
@@ -206,6 +226,29 @@ void Player::Draw() {
 		sq_pop(m_VM, 2);
 	}
 	sq_pop(m_VM, 2);
+
+	if (m_bDebugDrawEnable) {
+		Clb184::Point2D* pPoints = (Clb184::Point2D*)m_PrimBuffer.Lock();
+		pPoints[0] = { m_Points[0] * co_shape.r + pos, 0x8c1414ff };
+		pPoints[0 + 1] = { m_Points[1] * co_shape.r + pos, 0x8c1414ff };
+		pPoints[0 + 2] = { m_Points[2] * co_shape.r + pos, 0x8c1414ff };
+		pPoints[0 + 3] = { m_Points[3] * co_shape.r + pos, 0x8c1414ff };
+		pPoints[0 + 4] = { m_Points[4] * co_shape.r + pos, 0x8c1414ff };
+		pPoints[0 + 5] = { m_Points[5] * co_shape.r + pos, 0x8c1414ff };
+		pPoints[0 + 6] = { m_Points[6] * co_shape.r + pos, 0x8c1414ff };
+		pPoints[0 + 7] = { m_Points[7] * co_shape.r + pos, 0x8c1414ff };
+		pPoints[0 + 8] = { m_Points[8] * co_shape.r + pos, 0x8c1414ff };
+		pPoints[0 + 9] = { m_Points[9] * co_shape.r + pos, 0x8c1414ff };
+		pPoints[0 + 10] = { m_Points[10] * co_shape.r + pos, 0x8c1414ff };
+		pPoints[0 + 11] = { m_Points[11] * co_shape.r + pos, 0x8c1414ff };
+		pPoints[0 + 12] = { m_Points[12] * co_shape.r + pos, 0x8c1414ff };
+		pPoints[0 + 13] = { m_Points[13] * co_shape.r + pos, 0x8c1414ff };
+		pPoints[0 + 14] = { m_Points[14] * co_shape.r + pos, 0x8c1414ff };
+		pPoints[0 + 15] = { m_Points[15] * co_shape.r + pos, 0x8c1414ff };
+		pPoints[0 + 16] = { m_Points[16] * co_shape.r + pos, 0x8c1414ff };
+		m_PrimBuffer.Unlock(sizeof(Clb184::Point2D) * 17);
+	}
+
 }
 
 void Player::Kill() {
@@ -222,6 +265,20 @@ void Player::Kill() {
 		sq_pop(m_VM, 3);
 		CallNPSQFunc(m_VM, "OnDeath");
 	}
+}
+
+void Player::DrawHitbox() {
+	if (m_bDebugDrawEnable) {
+		Clb184::g_pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
+		Clb184::CDefault2DShader::GetShaderInstance().BindTexturelessVertexShader();
+		Clb184::CDefault2DShader::GetShaderInstance().BindTexturelessPixelShader();
+		m_PrimBuffer.BindToContext(0, 0);
+		Clb184::g_pContext->Draw(17, 0);
+	}
+}
+
+void Player::SetDebugDraw(bool state) {
+	m_bDebugDrawEnable = state;
 }
 
 SQInteger Player_SetPos(HSQUIRRELVM v) {
@@ -269,6 +326,12 @@ SQInteger Player_SetUV(HSQUIRRELVM v) {
 	g_Player.uv = pVec->obj;
 	return 0;
 }
+
+SQInteger Player_SetMutekiTime(HSQUIRRELVM v) {
+	sq_getinteger(v, -1, &g_Player.m_MutekiTime);
+	return 0;
+}
+
 SQInteger Player_SetColor(HSQUIRRELVM v) {
 	SQInteger color;
 	sq_getinteger(v, -1, &color);

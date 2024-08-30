@@ -15,13 +15,16 @@ public:
 	~GameMain();
 
 	void Initialize(const char* script);
+	void SetPlayerScript(const SQChar* player);
 	void Move();
 	void Draw();
 
 	bool IsInitialized() const;
 
 private:
+	void MoveDebug();
 	void DrawDebug();
+	void Reset();
 
 private:
 	bool m_bInitialized;
@@ -34,6 +37,14 @@ private:
 	Task2DManager m_Task2DManager;
 	Clb184::CMusicStream m_Music;
 	//EnemyManager m_EnemyManager;
+#ifdef DEBUG
+	bool m_LastPressedInv;
+	bool m_LastPressedR;
+	bool m_LastPressedHitbox;
+
+#endif
+	const char* m_ScriptName;
+	const char* m_PlayerScript;
 };
 
 

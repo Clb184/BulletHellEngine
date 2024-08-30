@@ -96,6 +96,8 @@ public:
 
     size_t GetSize() const;
 
+    void Reset();
+
     Node<T>* FindFreeBlock();
 
 private:
@@ -280,6 +282,17 @@ bool CDoubleLinkedArrayList<T>::DeleteBack(){
 template<class T>
 size_t CDoubleLinkedArrayList<T>::GetSize() const{
     return m_ListSize;
+}
+
+template<class T>
+void CDoubleLinkedArrayList<T>::Reset() {
+    Iterator<T> it = *GetBackIterator();
+    it.MoveFront();
+    Node<T>* pObj;
+    while ((pObj = it.GetData()) && pObj->active) {
+        DeleteFromIndex(pObj->id);
+        it.MoveFront();
+    }
 }
 
 template<class T>

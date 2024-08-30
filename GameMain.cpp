@@ -57,15 +57,20 @@ void GameMain::Initialize(const char* filename) {
 		PrintStack(m_VM);
 		sq_pop(m_VM, 1);
 
-		g_Player.Initialize("player/player_test.nut");
+		g_Player.Initialize(m_PlayerScript);
 
 		//Finally, initialize script
 		CallNPSQFunc(m_VM, "main");
 		m_Music.Load("music/STAGE_00.ogg");
 		m_Music.SetLoop(true);
 		//m_Music.Play(0.0f);
+		m_ScriptName = filename;
 		m_bInitialized = true;
 	}
+}
+
+void GameMain::SetPlayerScript(const SQChar* player) {
+	m_PlayerScript = player;
 }
 
 void GameMain::Move() {
@@ -74,6 +79,7 @@ void GameMain::Move() {
 		if (sq_getvmstate(m_VM) == SQ_VMSTATE_SUSPENDED) {
 			sq_wakeupvm(m_VM, SQFalse, SQFalse, SQTrue, SQFalse);
 		}
+		MoveDebug();
 		m_TaskManager.Move();
 		m_Task2DManager.Move();
 		g_Player.Move();
@@ -84,18 +90,57 @@ void GameMain::Move() {
 
 void GameMain::Draw() {
 	if (m_bRunOK) {
+		D3D11_RECT rc{ 
+			120.0, 0.0,
+			120.0 + 400.0, 480.0
+		};
+		Clb184::g_pContext->RSSetScissorRects(1, &rc);
+		Clb184::CDefault2DShader::GetShaderInstance().SetCenter({ 320.0, 0.0 });
+		Clb184::CDefault2DShader::GetShaderInstance().UpdateMatrix();
 		m_Task2DManager.Draw();
 		g_EnmManager.Draw();
 		g_Player.Draw();
 		g_BulletManager.Draw();
+		DrawDebug();
+		Clb184::CDefault2DShader::GetShaderInstance().SetCenter({ 0.0, 0.0 });
+		Clb184::CDefault2DShader::GetShaderInstance().UpdateMatrix();
 	}
-	DrawDebug();
 }
 
 bool GameMain::IsInitialized() const {
 	return m_bInitialized;
 }
 
-void GameMain::DrawDebug() {
+void GameMain::MoveDebug() {
+	static bool draw_enable = true;
+	bool this_hitbox = GetAsyncKeyState(VK_F2) & 0x8000;
+	bool this_inv = GetAsyncKeyState(VK_F4) & 0x8000;
+	bool this_reset = GetAsyncKeyState('R') & 0x8000;
+	if (this_hitbox && !m_LastPressedHitbox) {
+		draw_enable = !draw_enable;
+		g_EnmManager.SetDebugDraw(draw_enable);
+		g_BulletManager.SetDebugDraw(draw_enable);
+		g_Player.SetDebugDraw(draw_enable);
+	}
+	if (this_inv && !m_LastPressedInv)
+		g_Player.m_IsInvincible = !g_Player.m_IsInvincible;
+	if (this_reset && !m_LastPressedR)
+		Reset();
+	m_LastPressedInv = this_inv;
+	m_LastPressedR = this_reset;
+	m_LastPressedHitbox = this_hitbox;
 
+}
+
+void GameMain::DrawDebug() {
+	g_EnmManager.DrawHitbox();
+	g_BulletManager.DrawHitbox();
+	g_Player.DrawHitbox();
+}
+
+void GameMain::Reset() {
+	if (m_VM) {
+		sq_close(m_VM);
+		Initialize(m_ScriptName);
+	}
 }

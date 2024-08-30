@@ -18,10 +18,17 @@ public:
 	void Initialize();
 	void Move();
 	void Draw();
+	void SetDebugDraw(bool state);
+	void DrawHitbox();
 	Node<Enemy>* CreateEnemy();
 private:
 	CDoubleLinkedArrayList<Enemy> m_TaskList;
 	Clb184::CTexture** m_ppTextures;
+
+	Clb184::CVertexBuffer m_PrimBuffer;
+	Clb184::Point2D m_Points[17];
+	bool m_bDebugDrawEnable;
+	int m_Count;
 };
 
 extern EnemyManager g_EnmManager;
