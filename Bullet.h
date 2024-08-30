@@ -3,7 +3,7 @@
 #include "Task.h"
 #include "HitCalc.h"
 
-#define BULLET_MAX (2048)
+#define BULLET_MAX (2048 * 2)
 
 struct Bullet : TaskCollideableCircle {
 };
@@ -72,6 +72,7 @@ inline bool RegisterBulletClass(HSQUIRRELVM v) {
 	RegisterSQClassFunc(v, Task2D_SetScale, "SetScale");
 	RegisterSQClassFunc(v, Task2D_SetUV, "SetUV");
 	RegisterSQClassFunc(v, Task2D_SetRotation, "SetRotation");
+	RegisterSQClassFunc(v, Collision_SetRadius, "SetRadius");
 	create_class &= SQ_SUCCEEDED(sq_newslot(v, -3, SQFalse));
 	return create_class;
 }

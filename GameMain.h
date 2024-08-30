@@ -5,6 +5,7 @@
 #include "Task.h"
 #include "Enemy.h"
 #include "Bullet.h"
+#include "Player.h"
 #include "Tex.h"
 #include "SqHandlers.h"
 

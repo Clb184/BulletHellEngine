@@ -8,9 +8,9 @@
 wrl::ComPtr<ID3D11DepthStencilState> m_Draw3DState;
 wrl::ComPtr<ID3D11DepthStencilState> m_Draw2DState;
 
+#pragma comment(lib, "xinput.lib")
+
 int WINAPI wWinMain(HINSTANCE current, HINSTANCE prev, LPWSTR args, int cmd) {
-
-
 	GameMain g_GameMain;
 	
 	HWND Window = 0;
@@ -23,6 +23,10 @@ int WINAPI wWinMain(HINSTANCE current, HINSTANCE prev, LPWSTR args, int cmd) {
 	static Clb184::CKeyboard kbd;
 	wrl::ComPtr<IDXGIDebug1> pDXDebug;
 	HR = DXGIGetDebugInterface1(0, IID_PPV_ARGS(pDXDebug.GetAddressOf()));
+	AllocConsole();
+	freopen("CONOUT$", "w", stdout);
+	freopen("CONOUT$", "w", stderr);
+	freopen("CONIN$", "r", stdin);
 #endif
 	frame_limit.SetFramerate(60);
 
@@ -33,14 +37,10 @@ int WINAPI wWinMain(HINSTANCE current, HINSTANCE prev, LPWSTR args, int cmd) {
 	const wchar_t* title = L"Bullet Hell Game";
 #endif
 
-	Window = window.SpawnWindow(title, current, (WS_OVERLAPPEDWINDOW ^ (WS_MAXIMIZEBOX | WS_THICKFRAME)) | WS_POPUP);
 
-#ifdef DEBUG
-	AllocConsole();
-	freopen("CONOUT$", "w", stdout);
-	freopen("CONOUT$", "w", stderr);
-	freopen("CONIN$", "r", stdin);
-#endif
+	Window = window.SpawnWindow(title, current, (WS_OVERLAPPEDWINDOW ^ (WS_MAXIMIZEBOX | WS_THICKFRAME)) | WS_POPUP);
+	if (0 == Window) return -1;
+
 
 	D3D11_DEPTH_STENCIL_DESC depthd = {};
 	depthd.DepthEnable = TRUE;
@@ -76,7 +76,7 @@ int WINAPI wWinMain(HINSTANCE current, HINSTANCE prev, LPWSTR args, int cmd) {
 	text.Setup(1024, 1024);
 	text.SetText("Idiots are thinking...");
 	text.SetFont(L"Consolas");
-	text.SetSize(64.0f);
+	text.SetSize(38.0f);
 	text.Update();
 
 	Clb184::CD3DSprite spritetext;
@@ -126,8 +126,29 @@ int WINAPI wWinMain(HINSTANCE current, HINSTANCE prev, LPWSTR args, int cmd) {
 				sprite.SetPos({ 320.0f + res * 40.0f, 240.0f });
 				tex.BindToContext(0, SHADER_RESOURCE_BIND_PS);
 				sprite.Draw();
-
-
+				
+				//Testing XInput lol
+				XINPUT_STATE state;
+				XInputGetState(0, &state);
+				DWORD buttons = state.Gamepad.wButtons;
+				char pad[1024] = "";
+				sprintf(pad, "LX:%d LY:%d RX:%d RY:%d\n"
+					"X:%1d Y:%1d A:%1d B:%1d\n"
+					"LT:%1d RT:%1d LS:%1d RS:%1d\n"
+					"Back:%1d Start:%1d\n"
+					"Up:%1d Down:%1d Left:%1d Right:%1d\n"
+					"LeftTrigger:%d RightTrigger:%d\n"
+					, state.Gamepad.sThumbLX, state.Gamepad.sThumbLY, state.Gamepad.sThumbRX, state.Gamepad.sThumbRY,
+					bool(buttons & XINPUT_GAMEPAD_X), bool(buttons & XINPUT_GAMEPAD_Y), bool(buttons & XINPUT_GAMEPAD_A), bool(buttons & XINPUT_GAMEPAD_B),
+					bool(buttons & XINPUT_GAMEPAD_LEFT_THUMB), bool(buttons & XINPUT_GAMEPAD_RIGHT_THUMB), bool(buttons & XINPUT_GAMEPAD_LEFT_SHOULDER), bool(buttons & XINPUT_GAMEPAD_RIGHT_SHOULDER),
+					bool(buttons & XINPUT_GAMEPAD_BACK), bool(buttons & XINPUT_GAMEPAD_START),
+					bool(buttons & XINPUT_GAMEPAD_DPAD_UP), bool(buttons & XINPUT_GAMEPAD_DPAD_DOWN), bool(buttons & XINPUT_GAMEPAD_DPAD_LEFT), bool(buttons & XINPUT_GAMEPAD_DPAD_RIGHT),
+					state.Gamepad.bLeftTrigger, state.Gamepad.bRightTrigger
+					);
+				
+				text.SetText(pad);
+				text.Update();
+				
 				text.BindToContext(0, SHADER_RESOURCE_BIND_PS);
 				spritetext.Draw();
 

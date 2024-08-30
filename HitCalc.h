@@ -5,8 +5,14 @@
 #include <memory>
 
 struct CollissionShape {
-	float x = 0.0f;
-	float y = -100000.0f;
+	union {
+		struct {
+			float x;
+			float y;
+		};
+		glm::vec2 pos;
+	};
+
 };
 
 struct CollissionRect : public CollissionShape{

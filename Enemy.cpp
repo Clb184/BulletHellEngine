@@ -73,7 +73,7 @@ void EnemyManager::Draw() {
 			glm::vec2 pos = {};
 
 			pos.x = -test.size.x * 0.5f;
-			pos.y = -test.size.x * 0.5f;
+			pos.y = -test.size.y * 0.5f;
 
 			float l = pos.x;
 			float t = pos.y;

@@ -1,4 +1,5 @@
 #include "Bullet.h"
+#include "Player.h"
 
 static CMemoryPool<Node<Bullet>> g_TaskBulletPool;
 BulletManager g_BulletManager;
@@ -45,7 +46,11 @@ void BulletManager::Move() {
 	while ((pInst = it.GetData()) && pInst->active) {
 		//Enemy test = *pInst;
 		MoveTask(m_VM, pInst, &m_TaskList, m_ArrayObj);
-
+		pInst->co_shape.pos = pInst->pos;
+		if (hitCheckCC(g_Player.GetCollisionShape(), pInst->co_shape)) {
+			pInst->color = 0xff0000ff;
+			//sq_getprintfunc(m_VM)(m_VM, "hit!\n");
+		}
 		it.MoveFront();
 	}
 }

@@ -55,11 +55,13 @@ void GameMain::Initialize(const char* filename) {
 		g_BulletManager.Initialize();
 		sq_pop(m_VM, 1);
 
+		g_Player.Initialize("player/player_test.nut");
+
 		//Finally, initialize script
 		CallNPSQFunc(m_VM, "main");
 		m_Music.Load("music/ex_3.ogg");
 		m_Music.SetLoop(true);
-		m_Music.Play(0.0f);
+		//m_Music.Play(0.0f);
 
 	}
 }
@@ -72,6 +74,7 @@ void GameMain::Move() {
 		}
 		m_TaskManager.Move();
 		m_Task2DManager.Move();
+		g_Player.Move();
 		g_EnmManager.Move();
 		g_BulletManager.Move();
 	}
@@ -81,6 +84,7 @@ void GameMain::Draw() {
 	if (m_bRunOK) {
 		m_Task2DManager.Draw();
 		g_EnmManager.Draw();
+		g_Player.Draw();
 		g_BulletManager.Draw();
 	}
 	DrawDebug();
