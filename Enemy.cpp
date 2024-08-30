@@ -1,4 +1,5 @@
 #include "Enemy.h"
+#include "Player.h"
 
 static CMemoryPool<Node<Enemy>> g_TaskEnemyPool;
 EnemyManager g_EnmManager;
@@ -28,11 +29,16 @@ void EnemyManager::Move() {
 
 	Node<Enemy>* pInst;
 	Iterator<Enemy> it = *m_TaskList.GetBackIterator();
+	CollissionCircle phit = g_Player.co_shape;
 	it.MoveFront();
 	while ((pInst = it.GetData()) && pInst->active) {
 		//Enemy test = *pInst;
 		MoveTask(m_VM, pInst, &m_TaskList, m_ArrayObj);
-
+		pInst->co_shape.pos = pInst->pos;
+		if (hitCheckCC(phit, pInst->co_shape)) {
+			g_Player.Kill();
+			//sq_getprintfunc(m_VM)(m_VM, "hit!\n");
+		}
 		it.MoveFront();
 	}
 }
@@ -52,7 +58,7 @@ void EnemyManager::Draw() {
 	it.MoveFront();
 	sq_pushobject(m_VM, m_ArrayObj);
 	while ((pInst = it.GetData()) && pInst->active) {
-		if (pInst->is_delete) continue;
+		if (pInst->is_delete) { it.MoveFront(); continue; }
 		Enemy test = *pInst;
 		sq_pushinteger(m_VM, pInst->id);
 		sq_get(m_VM, -2);

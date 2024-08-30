@@ -5,6 +5,7 @@ GameMain::GameMain() {
 	m_VM = nullptr;
 	m_DeltaTime = 1.0f;
 	m_bRunOK = false;
+	m_bInitialized = false;
 }
 
 GameMain::~GameMain() {
@@ -53,16 +54,17 @@ void GameMain::Initialize(const char* filename) {
 		CManagerBase::SetTextureClass(SQGetObjectByName(m_VM, _SC("Texture")));
 		g_EnmManager.Initialize();
 		g_BulletManager.Initialize();
+		PrintStack(m_VM);
 		sq_pop(m_VM, 1);
 
 		g_Player.Initialize("player/player_test.nut");
 
 		//Finally, initialize script
 		CallNPSQFunc(m_VM, "main");
-		m_Music.Load("music/ex_3.ogg");
+		m_Music.Load("music/STAGE_00.ogg");
 		m_Music.SetLoop(true);
 		//m_Music.Play(0.0f);
-
+		m_bInitialized = true;
 	}
 }
 
@@ -88,6 +90,10 @@ void GameMain::Draw() {
 		g_BulletManager.Draw();
 	}
 	DrawDebug();
+}
+
+bool GameMain::IsInitialized() const {
+	return m_bInitialized;
 }
 
 void GameMain::DrawDebug() {

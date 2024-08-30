@@ -42,13 +42,15 @@ void BulletManager::Move() {
 
 	Node<Bullet>* pInst;
 	Iterator<Bullet> it = *m_TaskList.GetBackIterator();
+	CollissionCircle phit = g_Player.co_shape;
 	it.MoveFront();
 	while ((pInst = it.GetData()) && pInst->active) {
 		//Enemy test = *pInst;
 		MoveTask(m_VM, pInst, &m_TaskList, m_ArrayObj);
 		pInst->co_shape.pos = pInst->pos;
-		if (hitCheckCC(g_Player.GetCollisionShape(), pInst->co_shape)) {
-			pInst->color = 0xff0000ff;
+		if (hitCheckCC(phit, pInst->co_shape)) {
+			pInst->is_delete = true;
+			g_Player.Kill();
 			//sq_getprintfunc(m_VM)(m_VM, "hit!\n");
 		}
 		it.MoveFront();
@@ -69,7 +71,7 @@ void BulletManager::Draw() {
 
 	it.MoveFront();
 	while ((pInst = it.GetData()) && pInst->active) {
-		if (pInst->is_delete) continue;
+		if (pInst->is_delete) { it.MoveFront(); continue; }
 		Bullet test = *pInst;
 		float c = cos(test.rotation);
 		float s = sin(test.rotation);

@@ -29,8 +29,8 @@ function testing(x, y, c, tex) {
     for (local i = 0; i < 300; i++){
         ny = y + sin(i * (3.14159 / 180.0) * 2.0) * c;
         SetPos(vec2t(x, ny));
-        for (local j = 0; j < 50; j++) {
-            Bullet(bullet_test, x, ny, (rand() % 360).tofloat() * 3.1415926 / 180.0);
+        for (local j = 0; j < 1; j++) {
+            //Bullet(bullet_test, x, ny, (rand() % 360).tofloat() * 3.1415926 / 180.0);
         }
         wait(1);
     }

@@ -17,10 +17,14 @@ public:
 	void Initialize(const char* script);
 	void Move();
 	void Draw();
+
+	bool IsInitialized() const;
+
 private:
 	void DrawDebug();
 
 private:
+	bool m_bInitialized;
 	bool m_bRunOK;
 	float m_DeltaTime;
 	SQInteger m_GlobalTime;

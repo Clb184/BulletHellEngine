@@ -21,10 +21,9 @@ struct VMInstance {
 
 struct Task {
 	bool is_delete = false;
-	bool is_maincreated = false;
-	uint16_t create_flags = 0x0;
+	//bool is_maincreated = false;
+	//uint16_t create_flags = 0x0;
 	uint32_t flags = 0x00;
-	//HSQUIRRELVM main = nullptr;
 	HSQUIRRELVM main_thread = nullptr;
 	HSQUIRRELVM threads[16] = { nullptr, nullptr, nullptr, nullptr,nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
 	Task* parent = nullptr;
@@ -34,8 +33,7 @@ struct Task {
 };
 
 struct TaskDrawable2D : Task {
-	HSQOBJECT texture_handle;
-	glm::vec2 pos;
+	glm::vec2 pos = {0.0f, 0.0f};
 	glm::vec2 size = {32.0f, 32.0f};
 	glm::vec2 scale = {1.0f, 1.0f};
 	float rotation = 0.0f;
@@ -50,6 +48,7 @@ struct TaskDrawable3D : Task {
 
 struct TaskCollideableCircle : TaskDrawable2D {
 	CollissionCircle co_shape;
+	bool is_hit = false;
 };
 
 static SQInteger DummyRelease(SQUserPointer, SQInteger) {
@@ -144,16 +143,6 @@ SQInteger Collision_SetRadius(HSQUIRRELVM v);
 template <class T>
 inline void MoveTask(HSQUIRRELVM v, Node<T>* pTask, CDoubleLinkedArrayList<T>* pList, HSQOBJECT arrayobj) {
 	bool ret = false;
-	if (pTask->main_thread && 0) {
-		if (!pTask->is_maincreated) {
-			SQInteger n;
-			sq_getinteger(pTask->main_thread, -1, &n);
-			sq_pop(pTask->main_thread, 1);
-			sq_call(pTask->main_thread, n + 1, SQFalse, SQTrue);
-			pTask->is_maincreated = true;
-			ret = true;
-		}
-	}
 	if (pTask->main_thread) {
 		if (sq_getvmstate(pTask->main_thread) == SQ_VMSTATE_SUSPENDED && !pTask->is_delete) {
 			sq_wakeupvm(pTask->main_thread, SQFalse, SQFalse, SQTrue, SQFalse);

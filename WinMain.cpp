@@ -64,13 +64,14 @@ int WINAPI wWinMain(HINSTANCE current, HINSTANCE prev, LPWSTR args, int cmd) {
 	Clb184::CTexture tex;
 	tex.LoadTextureFromFile("graph/ball.tga");
 	Clb184::CD3DSprite sprite;
-	sprite.SetPos({ 320.0f, 240.0f });
-	sprite.SetSize({ 64.0f, 64.0f });
+	sprite.SetPos({ 600.0f, 430.0f });
+	sprite.SetSize({ 32.0f, 32.0f });
 	Clb184::CSamplerState sampler;
 	sampler.SetWrappingMode(OFFSET_WRAP);
 	sampler.SetSamplerKind(SAMPLER_PIXEL);
 	sampler.CreateSampler();
 	sampler.BindToContext(0, SHADER_RESOURCE_BIND_PS);
+	float rot = 0.0;
 
 	Clb184::CText text;
 	text.Setup(1024, 1024);
@@ -100,7 +101,11 @@ int WINAPI wWinMain(HINSTANCE current, HINSTANCE prev, LPWSTR args, int cmd) {
 
 	float f = 0;
 	bool sign = true;
-	g_GameMain.Initialize("script/main.nut");
+	Clb184::g_pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+	std::thread __loading([&]() {
+		g_GameMain.Initialize("script/main.nut");
+		});
+	bool not_init = false;
 	while (1) {
 		if (PeekMessage(&Msg, NULL, 0, 0, PM_NOREMOVE)) {
 			if (!GetMessage(&Msg, NULL, 0, 0)) {
@@ -113,49 +118,22 @@ int WINAPI wWinMain(HINSTANCE current, HINSTANCE prev, LPWSTR args, int cmd) {
 			if(frame_limit.IsNeedUpdate()) {
 				window.ClearWindow();
 				window.BindTargetView();
-				g_GameMain.Move();
-
 				Clb184::CDefault2DShader::GetShaderInstance().BindVertexShader();
 				Clb184::CDefault2DShader::GetShaderInstance().BindPixelShader();
 				Clb184::g_pContext->OMSetDepthStencilState(m_Draw2DState.Get(), 0);
-
-				g_GameMain.Draw();
-				double res = glm::mix((sign) ? -3.1415926 : 3.1415926, (sign) ? 3.1415926 : -3.1415926, glm::smoothstep(0.0, 1.0, fmod((double)f, 90.0) / 90.0));
-				Clb184::g_pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-				sprite.SetRotation(res);
-				sprite.SetPos({ 320.0f + res * 40.0f, 240.0f });
-				tex.BindToContext(0, SHADER_RESOURCE_BIND_PS);
-				sprite.Draw();
-				
-				//Testing XInput lol
-				XINPUT_STATE state;
-				XInputGetState(0, &state);
-				DWORD buttons = state.Gamepad.wButtons;
-				char pad[1024] = "";
-				sprintf(pad, "LX:%d LY:%d RX:%d RY:%d\n"
-					"X:%1d Y:%1d A:%1d B:%1d\n"
-					"LT:%1d RT:%1d LS:%1d RS:%1d\n"
-					"Back:%1d Start:%1d\n"
-					"Up:%1d Down:%1d Left:%1d Right:%1d\n"
-					"LeftTrigger:%d RightTrigger:%d\n"
-					, state.Gamepad.sThumbLX, state.Gamepad.sThumbLY, state.Gamepad.sThumbRX, state.Gamepad.sThumbRY,
-					bool(buttons & XINPUT_GAMEPAD_X), bool(buttons & XINPUT_GAMEPAD_Y), bool(buttons & XINPUT_GAMEPAD_A), bool(buttons & XINPUT_GAMEPAD_B),
-					bool(buttons & XINPUT_GAMEPAD_LEFT_THUMB), bool(buttons & XINPUT_GAMEPAD_RIGHT_THUMB), bool(buttons & XINPUT_GAMEPAD_LEFT_SHOULDER), bool(buttons & XINPUT_GAMEPAD_RIGHT_SHOULDER),
-					bool(buttons & XINPUT_GAMEPAD_BACK), bool(buttons & XINPUT_GAMEPAD_START),
-					bool(buttons & XINPUT_GAMEPAD_DPAD_UP), bool(buttons & XINPUT_GAMEPAD_DPAD_DOWN), bool(buttons & XINPUT_GAMEPAD_DPAD_LEFT), bool(buttons & XINPUT_GAMEPAD_DPAD_RIGHT),
-					state.Gamepad.bLeftTrigger, state.Gamepad.bRightTrigger
-					);
-				
-				text.SetText(pad);
-				text.Update();
-				
-				text.BindToContext(0, SHADER_RESOURCE_BIND_PS);
-				spritetext.Draw();
-
-				f+= 1.1;
-				if (f >= 90.0) {
-					f = 0.0;
-					sign = !sign;
+				if (g_GameMain.IsInitialized() && !not_init) {
+					__loading.join();
+					not_init = true;
+				}
+				if (not_init) {
+					g_GameMain.Move();
+					g_GameMain.Draw();
+				}
+				else {
+					tex.BindToContext(0, SHADER_RESOURCE_BIND_PS);
+					sprite.SetRotation(rot);
+					sprite.Draw();
+					rot+= 0.05;
 				}
 #ifdef _DEBUG
 				kbd.UpdateKeyboard();
