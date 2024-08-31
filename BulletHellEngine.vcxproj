@@ -168,13 +168,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Batcher.cpp" />
     <ClCompile Include="Bullet.cpp" />
     <ClCompile Include="CDrawableManager.cpp" />
     <ClCompile Include="CManagerBase.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="GameMain.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="PlayerShot.cpp" />
     <ClCompile Include="SqHandlers.cpp" />
     <ClCompile Include="sq_linalg.cpp" />
     <ClCompile Include="Task.cpp" />
@@ -182,7 +182,6 @@
     <ClCompile Include="WinMain.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Batcher.h" />
     <ClInclude Include="Bullet.h" />
     <ClInclude Include="CDrawableManager.h" />
     <ClInclude Include="Enemy.h" />
@@ -193,6 +192,7 @@
     <ClInclude Include="LinkedArrayList.h" />
     <ClInclude Include="MemoryPool.h" />
     <ClInclude Include="Player.h" />
+    <ClInclude Include="PlayerShot.h" />
     <ClInclude Include="SqHandlers.h" />
     <ClInclude Include="SquirrelMain.h" />
     <ClInclude Include="sq_linalg.h" />

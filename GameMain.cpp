@@ -83,6 +83,7 @@ void GameMain::Move() {
 		m_TaskManager.Move();
 		m_Task2DManager.Move();
 		g_Player.Move();
+		g_PlayerShotManager.Move();
 		g_EnmManager.Move();
 		g_BulletManager.Move();
 	}
@@ -99,6 +100,7 @@ void GameMain::Draw() {
 		Clb184::CDefault2DShader::GetShaderInstance().UpdateMatrix();
 		m_Task2DManager.Draw();
 		g_EnmManager.Draw();
+		g_PlayerShotManager.Draw();
 		g_Player.Draw();
 		g_BulletManager.Draw();
 		DrawDebug();
@@ -120,6 +122,7 @@ void GameMain::MoveDebug() {
 		draw_enable = !draw_enable;
 		g_EnmManager.SetDebugDraw(draw_enable);
 		g_BulletManager.SetDebugDraw(draw_enable);
+		g_PlayerShotManager.SetDebugDraw(draw_enable);
 		g_Player.SetDebugDraw(draw_enable);
 	}
 	if (this_inv && !m_LastPressedInv)
@@ -135,6 +138,7 @@ void GameMain::MoveDebug() {
 void GameMain::DrawDebug() {
 	g_EnmManager.DrawHitbox();
 	g_BulletManager.DrawHitbox();
+	g_PlayerShotManager.DrawHitbox();
 	g_Player.DrawHitbox();
 }
 

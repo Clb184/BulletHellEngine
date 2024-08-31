@@ -1,4 +1,5 @@
 #include "Player.h"
+#include "PlayerShot.h"
 
 Player g_Player;
 
@@ -43,6 +44,7 @@ void Player::Initialize(const SQChar* fname) {
 	RegisterSQFunc(m_VM, PrintCallStack, "PrintCallStack");
 	RegisterLinearAlgebraClass(m_VM);
 	RegisterTextureClass(m_VM);
+	RegisterPlayerShotClass(m_VM);
 	sq_pop(m_VM, 1);
 	CompileMemSQScript(
 		" function wait(t) {              "
@@ -80,10 +82,18 @@ void Player::Initialize(const SQChar* fname) {
 		sq_pushstring(m_VM, _SC("wait_next_life"), -1);
 		sq_pushinteger(m_VM, 120);
 		sq_newslot(m_VM, -3, SQFalse);
+		sq_pushstring(m_VM, _SC("x"), -1);
+		sq_pushfloat(m_VM, 0.0f);
+		sq_newslot(m_VM, -3, SQFalse);
+		sq_pushstring(m_VM, _SC("y"), -1);
+		sq_pushfloat(m_VM, 0.0f);
+		sq_newslot(m_VM, -3, SQFalse);
 		sq_newslot(m_VM, -3, SQFalse);
 		PrintStack(m_VM);
 		sq_pop(m_VM, 1);
 
+		g_PlayerShotManager.SetShotVM(m_VM);
+		g_PlayerShotManager.Initialize();
 
 		m_VBuffer.SetStrideInfo(sizeof(Clb184::Vertex2D));
 		m_VBuffer.Initialize(nullptr, sizeof(Clb184::Vertex2D) * 4, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
@@ -153,6 +163,16 @@ void Player::Move() {
 		pos += glm::vec2{ dx, dy } *glm::vec2(delta);
 		co_shape.pos = pos;
 	}
+	sq_pushroottable(m_VM);
+	sq_pushstring(m_VM, _SC("player"), -1);
+	sq_get(m_VM, -2);
+	sq_pushstring(m_VM, _SC("x"), -1);
+	sq_pushfloat(m_VM, pos.x);
+	sq_set(m_VM, -3);
+	sq_pushstring(m_VM, _SC("y"), -1);
+	sq_pushfloat(m_VM, pos.y);
+	sq_set(m_VM, -3);
+	sq_pop(m_VM, 2);
 	//if (sq_getvmstate(m_VM) != SQ_VMSTATE_IDLE) {
 	sq_collectgarbage(m_VM);
 	if (sq_getvmstate(m_VM) == SQ_VMSTATE_SUSPENDED) {
@@ -255,7 +275,7 @@ void Player::Kill() {
 	if (!m_IsInvincible && !(m_MutekiTime > 0 || m_WaitNextLife >0)) {
 		m_IsDead = true;
 		m_bEnableMove = false;
-		sq_wakeupvm(m_VM, SQFalse, SQFalse, SQTrue, SQTrue);
+		if(sq_getvmstate(m_VM) == SQ_VMSTATE_SUSPENDED) sq_wakeupvm(m_VM, SQFalse, SQFalse, SQFalse, SQTrue);
 		sq_pushroottable(m_VM);
 		sq_pushstring(m_VM, _SC("player"), -1);
 		sq_get(m_VM, -2);

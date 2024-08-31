@@ -6,6 +6,7 @@
 #include "Enemy.h"
 #include "Bullet.h"
 #include "Player.h"
+#include "PlayerShot.h"
 #include "Tex.h"
 #include "SqHandlers.h"
 

@@ -46,12 +46,12 @@ void EnemyManager::Move() {
 	CollissionCircle phit = g_Player.co_shape;
 	it.MoveFront();
 	while ((pInst = it.GetData()) && pInst->active) {
-		//Enemy test = *pInst;
+		if (pInst->life <= 0)
+			pInst->is_delete = true;
 		MoveTask(m_VM, pInst, &m_TaskList, m_ArrayObj);
 		pInst->co_shape.pos = pInst->pos;
 		if (hitCheckCC(phit, pInst->co_shape)) {
 			g_Player.Kill();
-			//sq_getprintfunc(m_VM)(m_VM, "hit!\n");
 		}
 		it.MoveFront();
 	}
@@ -159,6 +159,10 @@ void EnemyManager::Draw() {
 	m_Count = cnt;
 }
 
+Iterator<Enemy>* EnemyManager::GetListIterator() {
+	return m_TaskList.GetBackIterator();
+}
+
 void EnemyManager::SetDebugDraw(bool state) {
 	m_bDebugDrawEnable = state;
 }
@@ -177,4 +181,16 @@ void EnemyManager::DrawHitbox() {
 
 Node<Enemy>* EnemyManager::CreateEnemy() {
 	return m_TaskList.AddFront();
+}
+
+SQInteger Enemy_SetLife(HSQUIRRELVM v) {
+	union {
+		SQUserPointer pData;
+		Node<Enemy>* pEnm;
+	};
+	SQInteger dmg;
+	sq_getinstanceup(v, 1, &pData, NULL);
+	sq_getinteger(v, 2, &dmg);
+	pEnm->life = static_cast<int>(dmg);
+	return 0;
 }

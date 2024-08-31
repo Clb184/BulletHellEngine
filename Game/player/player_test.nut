@@ -9,7 +9,7 @@ function main() {
     player.SetMutekiTime(200);
     player.SetColor(0xffffffff);
     player.SetSize(vec2t(56.88, 64.0));
-    player.SetRadius(24.0);
+    player.SetRadius(2.0);
     player.SetUV(morgan_idle);
     player.EnableMove(false);
     for (local i = 0; i < 60; i++) {
@@ -20,11 +20,30 @@ function main() {
     }
     player.EnableMove(true);
     while (1){
-        wait(1);
+        PlayerShot(shot_test, player.x, player.y, PI * -0.5 - 0.4, 12.0);
+        PlayerShot(shot_test, player.x, player.y, PI * -0.5 - 0.2, 12.0);
+        PlayerShot(shot_test, player.x, player.y, PI * -0.5, 12.0);
+        PlayerShot(shot_test, player.x, player.y, PI * -0.5 + 0.2, 12.0);
+        PlayerShot(shot_test, player.x, player.y, PI * -0.5 + 0.4, 12.0);
+        wait(5);
     }
 }
 
 function OnDeath() {
     player.SetColor(0xff0000ff);
-    wait(200);
+    wait(60);
+}
+
+function shot_test(x, y, dir, speed) {
+    local pos = vec2t(x, y);
+    local vx = cos(dir) * speed;
+    local vy = sin(dir) * speed;
+    SetRadius(10.0);
+    SetDamage(30);
+    while (pos.y() > 0) {
+        SetPos(pos);
+        wait(1);
+        pos.y(pos.y() + vy);
+        pos.x(pos.x() + vx);
+    }
 }

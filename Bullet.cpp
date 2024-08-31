@@ -178,7 +178,6 @@ void BulletManager::SetTexture(const SQChar* name) {
 		m_BulletTexture.CreateEmptyTexture(256, 256, 0xffffffff);
 }
 
-Node<Bullet>* BulletManager::CreateBullet()
-{
+Node<Bullet>* BulletManager::CreateBullet() {
     return m_TaskList.AddFront();
 }

@@ -48,8 +48,4 @@ SQInteger Player_SetMutekiTime(HSQUIRRELVM v);
 SQInteger Player_SetRadius(HSQUIRRELVM v);
 SQInteger Player_EnableMove(HSQUIRRELVM v);
 
-inline bool RegisterPlayerClass(HSQUIRRELVM v) {
-	return true;
-}
-
 #endif

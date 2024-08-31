@@ -6,6 +6,7 @@
 #define ENEMY_MAX 1024
 
 struct Enemy : TaskCollideableCircle {
+	int life = 100;
 };
 
 extern CMemoryPool<Node<Enemy>> g_TaskEnemyPool;
@@ -18,6 +19,7 @@ public:
 	void Initialize();
 	void Move();
 	void Draw();
+	Iterator<Enemy>* GetListIterator();
 	void SetDebugDraw(bool state);
 	void DrawHitbox();
 	Node<Enemy>* CreateEnemy();
@@ -56,6 +58,8 @@ static void EnmInitialize(HSQUIRRELVM v, Node<Enemy>* pTask) {
 	Task2DInitialize(v, (Node<TaskDrawable2D>*)pTask);
 }
 
+SQInteger Enemy_SetLife(HSQUIRRELVM v);
+
 inline bool RegisterEnemyClass(HSQUIRRELVM v) {
 	bool create_class = false;
 	sq_pushstring(v, "Enemy", -1);
@@ -69,6 +73,7 @@ inline bool RegisterEnemyClass(HSQUIRRELVM v) {
 	RegisterSQClassFunc(v, Task2D_SetUV, "SetUV");
 	RegisterSQClassFunc(v, Task2D_SetRotation, "SetRotation");
 	RegisterSQClassFunc(v, Collision_SetRadius, "SetRadius");
+	RegisterSQClassFunc(v, Enemy_SetLife, "SetLife");
 	create_class &= SQ_SUCCEEDED(sq_newslot(v, -3, SQFalse));
 	return create_class;
 }
