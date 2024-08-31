@@ -367,5 +367,6 @@ Game/music/
 Game/graph/
 Game/sound/
 Game/bg/
+Trash/
 *.clip
 *.exe
