@@ -6,6 +6,9 @@ GameMain::GameMain() {
 	m_DeltaTime = 1.0f;
 	m_bRunOK = false;
 	m_bInitialized = false;
+#ifdef DEBUG
+	m_bDebugDrawEnable = true;
+#endif
 }
 
 GameMain::~GameMain() {
@@ -65,6 +68,24 @@ void GameMain::Initialize(const char* filename) {
 		m_Music.SetLoop(true);
 		//m_Music.Play(0.0f);
 		m_ScriptName = filename;
+#ifdef DEBUG
+		m_DebugText.Setup(512, 512);
+		m_DebugText.SetSize(16);
+		m_DebugText.SetBold(false);
+		uint32_t color = 0xffffffff;
+		const float debx = 100.0f;
+		const float deby = 20.0f;
+		const float debw = 200.0f;
+		const float debh = 480.0f;
+		Clb184::Vertex2D points[4];
+		points[0] = { debx, deby, color, 0.0, 0.0 };
+		points[1] = { debx + debw, deby, color, debw / 512.0f, 0.0 };
+		points[2] = { debx, deby + debh, color, 0.0, debh / 512.0f };
+		points[3] = { debx + debw, deby + debh, color, debw / 512.0f, debh / 512.0f };
+		m_SBuffer.Initialize(points, sizeof(points), D3D11_USAGE_DEFAULT, 0);
+		m_SBuffer.SetStrideInfo(sizeof(Clb184::Vertex2D));
+		MoveDebug();
+#endif
 		m_bInitialized = true;
 	}
 }
@@ -79,13 +100,13 @@ void GameMain::Move() {
 		if (sq_getvmstate(m_VM) == SQ_VMSTATE_SUSPENDED) {
 			sq_wakeupvm(m_VM, SQFalse, SQFalse, SQTrue, SQFalse);
 		}
-		MoveDebug();
-		m_TaskManager.Move();
-		m_Task2DManager.Move();
 		g_Player.Move();
 		g_PlayerShotManager.Move();
 		g_EnmManager.Move();
 		g_BulletManager.Move();
+#ifdef DEBUG
+		MoveDebug();
+#endif
 	}
 }
 
@@ -98,41 +119,59 @@ void GameMain::Draw() {
 		Clb184::g_pContext->RSSetScissorRects(1, &rc);
 		Clb184::CDefault2DShader::GetShaderInstance().SetCenter({ 320.0, 0.0 });
 		Clb184::CDefault2DShader::GetShaderInstance().UpdateMatrix();
-		m_Task2DManager.Draw();
 		g_EnmManager.Draw();
 		g_PlayerShotManager.Draw();
 		g_Player.Draw();
 		g_BulletManager.Draw();
+#ifdef DEBUG
 		DrawDebug();
+#endif
 		Clb184::CDefault2DShader::GetShaderInstance().SetCenter({ 0.0, 0.0 });
 		Clb184::CDefault2DShader::GetShaderInstance().UpdateMatrix();
 	}
+}
+
+void GameMain::SetDebugDraw(bool state) {
+	m_bDebugDrawEnable = state;
 }
 
 bool GameMain::IsInitialized() const {
 	return m_bInitialized;
 }
 
+#ifdef DEBUG
 void GameMain::MoveDebug() {
-	static bool draw_enable = true;
 	bool this_hitbox = GetAsyncKeyState(VK_F2) & 0x8000;
 	bool this_inv = GetAsyncKeyState(VK_F4) & 0x8000;
 	bool this_reset = GetAsyncKeyState('R') & 0x8000;
 	if (this_hitbox && !m_LastPressedHitbox) {
-		draw_enable = !draw_enable;
-		g_EnmManager.SetDebugDraw(draw_enable);
-		g_BulletManager.SetDebugDraw(draw_enable);
-		g_PlayerShotManager.SetDebugDraw(draw_enable);
-		g_Player.SetDebugDraw(draw_enable);
+		m_bDebugDrawEnable = !m_bDebugDrawEnable;
+		g_EnmManager.SetDebugDraw(m_bDebugDrawEnable);
+		g_BulletManager.SetDebugDraw(m_bDebugDrawEnable);
+		g_PlayerShotManager.SetDebugDraw(m_bDebugDrawEnable);
+		g_Player.SetDebugDraw(m_bDebugDrawEnable);
 	}
 	if (this_inv && !m_LastPressedInv)
 		g_Player.m_IsInvincible = !g_Player.m_IsInvincible;
 	if (this_reset && !m_LastPressedR)
 		Reset();
+	char buf[2048] = "";
+	sprintf_s(buf, 
+		"Enemy		:%8d\n"
+		"Bullet		:%8d\n"
+		"PlayerShot	:%8d\n"
+		"Player		:%8s\n"
+		"\0",
+		g_EnmManager.GetItemCnt(),
+		g_BulletManager.GetItemCnt(),
+		g_PlayerShotManager.GetItemCnt(),
+		(g_Player.m_IsInvincible || g_Player.m_MutekiTime > 0) ? "Invi" : "Vuln"
+	);
+	m_DebugText.SetText(buf);
+	m_DebugText.Update();
 	m_LastPressedInv = this_inv;
 	m_LastPressedR = this_reset;
 	m_LastPressedHitbox = this_hitbox;
-
 }
 
 void GameMain::DrawDebug() {
@@ -140,7 +179,22 @@ void GameMain::DrawDebug() {
 	g_BulletManager.DrawHitbox();
 	g_PlayerShotManager.DrawHitbox();
 	g_Player.DrawHitbox();
+
+	if (m_bDebugDrawEnable) {
+		Clb184::CDefault2DShader::GetShaderInstance().SetCenter({ 0.0, 0.0 });
+		Clb184::CDefault2DShader::GetShaderInstance().UpdateMatrix();
+		D3D11_RECT rc = { 0.0, 0.0, 640.0, 480.0 };
+		Clb184::g_pContext->RSSetScissorRects(1, &rc);
+		Clb184::g_pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+		Clb184::CDefault2DShader::GetShaderInstance().BindVertexShader();
+		Clb184::CDefault2DShader::GetShaderInstance().BindPixelShader();
+		m_SBuffer.BindToContext(0, 0);
+		m_DebugText.BindToContext(0, SHADER_RESOURCE_BIND_PS);
+		Clb184::g_pContext->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+		Clb184::g_pContext->Draw(4, 0);
+	}
 }
+#endif
 
 void GameMain::Reset() {
 	if (m_VM) {

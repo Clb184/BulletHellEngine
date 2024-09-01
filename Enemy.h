@@ -22,6 +22,7 @@ public:
 	Iterator<Enemy>* GetListIterator();
 	void SetDebugDraw(bool state);
 	void DrawHitbox();
+	int GetItemCnt() const;
 	Node<Enemy>* CreateEnemy();
 private:
 	CDoubleLinkedArrayList<Enemy> m_TaskList;
@@ -56,9 +57,11 @@ static void EnmListSetup(HSQUIRRELVM v, Node<Enemy>* pTask) {
 
 static void EnmInitialize(HSQUIRRELVM v, Node<Enemy>* pTask) {
 	Task2DInitialize(v, (Node<TaskDrawable2D>*)pTask);
+	pTask->co_shape.pos = pTask->pos;
 }
 
 SQInteger Enemy_SetLife(HSQUIRRELVM v);
+SQInteger Enemy_GetLife(HSQUIRRELVM v);
 
 inline bool RegisterEnemyClass(HSQUIRRELVM v) {
 	bool create_class = false;
@@ -74,6 +77,7 @@ inline bool RegisterEnemyClass(HSQUIRRELVM v) {
 	RegisterSQClassFunc(v, Task2D_SetRotation, "SetRotation");
 	RegisterSQClassFunc(v, Collision_SetRadius, "SetRadius");
 	RegisterSQClassFunc(v, Enemy_SetLife, "SetLife");
+	RegisterSQClassFunc(v, Enemy_GetLife, "GetLife");
 	create_class &= SQ_SUCCEEDED(sq_newslot(v, -3, SQFalse));
 	return create_class;
 }

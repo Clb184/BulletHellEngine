@@ -21,6 +21,7 @@ public:
 	void DrawHitbox();
 	void SetDebugDraw(bool state);
 	void SetTexture(const SQChar* name);
+	int GetItemCnt() const;
 	Node<Bullet>* CreateBullet();
 private:
 	CDoubleLinkedArrayList<Bullet> m_TaskList;
@@ -63,6 +64,7 @@ static void BulletListSetup(HSQUIRRELVM v, Node<Bullet>* pTask) {
 
 static void BulletInitialize(HSQUIRRELVM v, Node<Bullet>* pTask) {
 	Task2DInitialize(v, (Node<TaskDrawable2D>*)pTask);
+	pTask->co_shape.pos = pTask->pos;
 }
 
 inline bool RegisterBulletClass(HSQUIRRELVM v) {

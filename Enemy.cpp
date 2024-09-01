@@ -72,12 +72,13 @@ void EnemyManager::Draw() {
 	Clb184::Vertex2D* pVertices = (Clb184::Vertex2D*)(m_VBuffer.Lock());
 	if (!pVertices) return;
 
+#ifdef DEBUG
 	Clb184::Point2D* pPoints = nullptr;
 	if (m_bDebugDrawEnable) {
 		pPoints = (Clb184::Point2D*)(m_PrimBuffer.Lock());
 		if (!pPoints) return;
 	}
-
+#endif
 	it.MoveFront();
 	sq_pushobject(m_VM, m_ArrayObj);
 	while ((pInst = it.GetData()) && pInst->active) {
@@ -113,7 +114,8 @@ void EnemyManager::Draw() {
 			pVertices[(cnt << 2) + 1] = { -pos.x * c - pos.y * s + test.pos.x, -pos.x * s + pos.y * c + test.pos.y, color, rc.z, rc.y };
 			pVertices[(cnt << 2) + 3] = { -pos.x * c - -pos.y * s + test.pos.x, -pos.x * s + -pos.y * c + test.pos.y, color, rc.z, rc.w };
 			pVertices[(cnt << 2) + 2] = { pos.x * c - -pos.y * s + test.pos.x, pos.x * s + -pos.y * c + test.pos.y, color, rc.x, rc.w };
-			
+
+#ifdef DEBUG
 			if (m_bDebugDrawEnable) {
 				pPoints[(cnt * 17)] =      { m_Points[0].Pos  * test.co_shape.r + test.pos, 0x8c1414ff };
 				pPoints[(cnt * 17) + 1] =  { m_Points[1].Pos  * test.co_shape.r + test.pos, 0x8c1414ff };
@@ -134,6 +136,7 @@ void EnemyManager::Draw() {
 				pPoints[(cnt * 17) + 16] = { m_Points[16].Pos * test.co_shape.r + test.pos, 0x8c1414ff };
 
 			}
+#endif
 			cnt++;
 
 		}
@@ -141,8 +144,12 @@ void EnemyManager::Draw() {
 		sq_pop(m_VM, 3);
 	}
 	m_VBuffer.Unlock(sizeof(Clb184::Vertex2D) * 4 * cnt);
+
+#ifdef DEBUG
 	if (m_bDebugDrawEnable)
 		m_PrimBuffer.Unlock(sizeof(Clb184::Point2D) * 17 * cnt);
+#endif
+
 	sq_pop(m_VM, 1);
 	Clb184::CTexture* past = nullptr;
 	Clb184::CDefault2DShader::GetShaderInstance().BindVertexShader();
@@ -168,6 +175,7 @@ void EnemyManager::SetDebugDraw(bool state) {
 }
 
 void EnemyManager::DrawHitbox() {
+#ifdef DEBUG
 	if (m_bDebugDrawEnable) {
 		Clb184::g_pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
 		Clb184::CDefault2DShader::GetShaderInstance().BindTexturelessVertexShader();
@@ -177,6 +185,11 @@ void EnemyManager::DrawHitbox() {
 			Clb184::g_pContext->Draw(17, i * 17);
 		}
 	}
+#endif
+}
+
+int EnemyManager::GetItemCnt() const {
+	return m_TaskList.GetSize();
 }
 
 Node<Enemy>* EnemyManager::CreateEnemy() {
@@ -193,4 +206,14 @@ SQInteger Enemy_SetLife(HSQUIRRELVM v) {
 	sq_getinteger(v, 2, &dmg);
 	pEnm->life = static_cast<int>(dmg);
 	return 0;
+}
+
+SQInteger Enemy_GetLife(HSQUIRRELVM v) {
+	union {
+		SQUserPointer pData;
+		Node<Enemy>* pEnm;
+	};
+	sq_getinstanceup(v, 1, &pData, NULL);
+	sq_pushinteger(v, pEnm->life);
+	return 1;
 }

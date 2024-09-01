@@ -87,12 +87,13 @@ void BulletManager::Draw() {
 	Clb184::Vertex2D* pVertices = (Clb184::Vertex2D*)(m_VBuffer.Lock());
 	if (!pVertices) return;
 
+#ifdef DEBUG
 	Clb184::Point2D* pPoints = nullptr;
 	if (m_bDebugDrawEnable) {
 		pPoints = (Clb184::Point2D*)(m_PrimBuffer.Lock());
 		if (!pPoints) return;
 	}
-
+#endif
 	it.MoveFront();
 	while ((pInst = it.GetData()) && pInst->active) {
 		if (pInst->is_delete) { it.MoveFront(); continue; }
@@ -119,6 +120,7 @@ void BulletManager::Draw() {
 		pVertices[(cnt << 2) + 2] = { -pos.x * c - -pos.y * s + test.pos.x, -pos.x * s + -pos.y * c + test.pos.y, color, rc.z, rc.w };
 		pVertices[(cnt << 2) + 3] = { pos.x * c - -pos.y * s + test.pos.x, pos.x * s + -pos.y * c + test.pos.y, color, rc.x, rc.w };
 
+#ifdef DEBUG
 		if (m_bDebugDrawEnable) {
 			pPoints[(cnt * 17)] = { m_Points[0].Pos * test.co_shape.r + test.pos,       0x8c1414ff };
 			pPoints[(cnt * 17) + 1] = { m_Points[1].Pos * test.co_shape.r + test.pos,   0x8c1414ff };
@@ -139,12 +141,15 @@ void BulletManager::Draw() {
 			pPoints[(cnt * 17) + 16] = { m_Points[16].Pos * test.co_shape.r + test.pos, 0x8c1414ff };
 
 		}
+#endif
 		cnt++;
 		it.MoveFront();
 	}
 	m_VBuffer.Unlock(sizeof(Clb184::Vertex2D) * 4 * cnt);
+#ifdef DEBUG
 	if (m_bDebugDrawEnable)
 		m_PrimBuffer.Unlock(sizeof(Clb184::Point2D) * 17 * cnt);
+#endif
 
 	Clb184::g_pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	Clb184::CDefault2DShader::GetShaderInstance().BindVertexShader();
@@ -157,6 +162,7 @@ void BulletManager::Draw() {
 }
 
 void BulletManager::DrawHitbox() {
+#ifdef DEBUG
 	if (m_bDebugDrawEnable) {
 		Clb184::g_pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
 		Clb184::CDefault2DShader::GetShaderInstance().BindTexturelessVertexShader();
@@ -166,7 +172,7 @@ void BulletManager::DrawHitbox() {
 			Clb184::g_pContext->Draw(17, i * 17);
 		}
 	}
-
+#endif
 }
 
 void BulletManager::SetDebugDraw(bool state) {
@@ -176,6 +182,10 @@ void BulletManager::SetDebugDraw(bool state) {
 void BulletManager::SetTexture(const SQChar* name) {
 	if(false == m_BulletTexture.LoadTextureFromFile(name))
 		m_BulletTexture.CreateEmptyTexture(256, 256, 0xffffffff);
+}
+
+int BulletManager::GetItemCnt() const {
+	return m_TaskList.GetSize();
 }
 
 Node<Bullet>* BulletManager::CreateBullet() {

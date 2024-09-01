@@ -132,6 +132,10 @@ void TaskManager::Move() {
 	}
 }
 
+int TaskManager::GetItemCnt() const {
+	return m_TaskList.GetSize();
+}
+
 Task2DManager::Task2DManager() :
 	m_TaskList(TASK2D_MAX, &g_TaskDrawable2DPool)
 {

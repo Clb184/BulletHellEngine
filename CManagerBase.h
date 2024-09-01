@@ -11,6 +11,7 @@ public:
 	static void SetVM(HSQUIRRELVM v) { m_VM = v; }
 	static HSQUIRRELVM GetVM() { return m_VM; }
 	static void SetTextureClass(const HSQOBJECT& obj) { m_TextureObj = obj; }
+	virtual int GetItemCnt() const = 0;
 protected:
 	static float* m_pDeltaTime;
 	static HSQUIRRELVM m_VM;

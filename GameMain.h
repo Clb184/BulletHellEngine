@@ -20,13 +20,16 @@ public:
 	void Move();
 	void Draw();
 
+	void SetDebugDraw(bool state);
+
 	bool IsInitialized() const;
 
 private:
+#ifdef DEBUG
 	void MoveDebug();
 	void DrawDebug();
 	void Reset();
-
+#endif
 private:
 	bool m_bInitialized;
 	bool m_bRunOK;
@@ -34,11 +37,14 @@ private:
 	SQInteger m_GlobalTime;
 	HSQUIRRELVM m_VM;
 
-	TaskManager m_TaskManager;
-	Task2DManager m_Task2DManager;
 	Clb184::CMusicStream m_Music;
 	//EnemyManager m_EnemyManager;
 #ifdef DEBUG
+
+	Clb184::CText m_DebugText;
+	Clb184::CVertexBuffer m_SBuffer;
+
+	bool m_bDebugDrawEnable;
 	bool m_LastPressedInv;
 	bool m_LastPressedR;
 	bool m_LastPressedHitbox;

@@ -181,21 +181,23 @@ void Player::Move() {
 	if (m_MutekiTime > 0) {
 		m_MutekiTime--;
 	}
-	if (m_WaitNextLife > 0 && m_IsDead) {
-		m_WaitNextLife--;
-	}
-	else if (m_WaitNextLife <= 0 && m_IsDead) {
-		m_bEnableMove = true;
-		sq_wakeupvm(m_VM, SQFalse, SQFalse, SQTrue, SQTrue);
-		CallNPSQFunc(m_VM, "main");
-		sq_pushroottable(m_VM);
-		sq_pushstring(m_VM, _SC("player"), -1);
-		sq_get(m_VM, -2);
-		sq_pushstring(m_VM, _SC("muteki_time"), -1);
-		sq_get(m_VM, -2);
-		sq_getinteger(m_VM, -1, &m_MutekiTime);
-		sq_pop(m_VM, 3);
-		m_IsDead = false;
+	if (m_IsDead) {
+		if (m_WaitNextLife > 0) {
+			m_WaitNextLife--;
+		}
+		if (m_WaitNextLife <= 0) {
+			m_bEnableMove = true;
+			sq_wakeupvm(m_VM, SQFalse, SQFalse, SQTrue, SQTrue);
+			CallNPSQFunc(m_VM, "main");
+			sq_pushroottable(m_VM);
+			sq_pushstring(m_VM, _SC("player"), -1);
+			sq_get(m_VM, -2);
+			sq_pushstring(m_VM, _SC("muteki_time"), -1);
+			sq_get(m_VM, -2);
+			sq_getinteger(m_VM, -1, &m_MutekiTime);
+			sq_pop(m_VM, 3);
+			m_IsDead = false;
+		}
 	}
 }
 

@@ -106,7 +106,7 @@ int WINAPI wWinMain(HINSTANCE current, HINSTANCE prev, LPWSTR args, int cmd) {
 			TranslateMessage(&Msg);
 			DispatchMessage(&Msg);
 		}
-		else if (window.GetWindowActive() || 1) {
+		else if (window.GetWindowActive()) {
 			if(frame_limit.IsNeedUpdate()) {
 				window.ClearWindow();
 				window.BindTargetView();
@@ -133,8 +133,8 @@ int WINAPI wWinMain(HINSTANCE current, HINSTANCE prev, LPWSTR args, int cmd) {
 #endif
 
 				char numbuf[8] = "";
-				D3D11_RECT rc = {0.0, 0.0, 640.0, 480.0};
 				sprintf_s(numbuf, "%.2f", frame_limit.GetMeanFPS());
+				D3D11_RECT rc = { 0.0, 0.0, 640.0, 480.0 };
 				Clb184::g_pContext->RSSetScissorRects(1, &rc);
 				Clb184::g_pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 				Clb184::CDefault2DShader::GetShaderInstance().BindVertexShader();

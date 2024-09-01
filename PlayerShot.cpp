@@ -71,6 +71,7 @@ void PlayerShotManager::Move() {
 			if (hitCheckCC(pInst->co_shape, pEnm->co_shape)) {
 				pInst->is_delete = true;
 				pEnm->life -= pInst->damage;
+				//printf("Hit x:%f y:%f, cx:%f cy:%f\n", pInst->pos.x, pInst->pos.y, pInst->co_shape.x, pInst->co_shape.y);
 				//printf("Hit: Rem HP %d\n", pEnm->life);
 			}
 			it2.MoveFront();
@@ -189,6 +190,10 @@ void PlayerShotManager::SetTexture(const SQChar* name) {
 
 void PlayerShotManager::SetShotVM(HSQUIRRELVM v) {
 	m_VM = v;
+}
+
+int PlayerShotManager::GetItemCnt() const {
+	return m_TaskList.GetSize();
 }
 
 Node<PlayerShot>* PlayerShotManager::CreateShot() {

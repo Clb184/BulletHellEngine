@@ -161,14 +161,14 @@ inline void MoveTask(HSQUIRRELVM v, Node<T>* pTask, CDoubleLinkedArrayList<T>* p
 		}
 	}
 
-	for (auto& v : pTask->threads) {
-		if (!v) continue;
-		if (sq_getvmstate(v) == SQ_VMSTATE_SUSPENDED) {
-			sq_wakeupvm(v, SQFalse, SQFalse, SQTrue, SQFalse);
-		}
-		if (sq_getvmstate(v) == SQ_VMSTATE_IDLE)
-			sq_close(v);
-	}
+	//for (auto& v : pTask->threads) {
+	//	if (!v) continue;
+	//	if (sq_getvmstate(v) == SQ_VMSTATE_SUSPENDED) {
+	//		sq_wakeupvm(v, SQFalse, SQFalse, SQTrue, SQFalse);
+	//	}
+	//	if (sq_getvmstate(v) == SQ_VMSTATE_IDLE)
+	//		sq_close(v);
+	//}
 }
 
 extern CMemoryPool<Node<Task>> g_TaskPool;
@@ -182,7 +182,7 @@ public:
 
 	void Initialize();
 	void Move();
-
+	int GetItemCnt() const;
 private:
 	CDoubleLinkedArrayList<Task> m_TaskList;
 };

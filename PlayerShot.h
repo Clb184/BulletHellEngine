@@ -23,6 +23,7 @@ public:
 	void SetDebugDraw(bool state);
 	void SetTexture(const SQChar* name);
 	void SetShotVM(HSQUIRRELVM v);
+	int GetItemCnt() const;
 	Node<PlayerShot>* CreateShot();
 private:
 	CDoubleLinkedArrayList<PlayerShot> m_TaskList;
@@ -66,6 +67,7 @@ static void PlayerShotListSetup(HSQUIRRELVM v, Node<PlayerShot>* pTask) {
 
 static void PlayerShotInitialize(HSQUIRRELVM v, Node<PlayerShot>* pTask) {
 	Task2DInitialize(v, (Node<TaskDrawable2D>*)pTask);
+	pTask->co_shape.pos = pTask->pos;
 }
 
 SQInteger PlayerShot_SetDamage(HSQUIRRELVM v);
