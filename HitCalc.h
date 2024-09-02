@@ -91,6 +91,11 @@ inline bool _vectorcall hitCheckCC(const CollissionCircle& enm1, const Collissio
 inline bool _vectorcall hitCheckRectCircle(const CollissionCircle& c, const CollissionRectRot& r) {
 	float vecx = c.x - r.x;
 	float vecy = c.y - r.y;
+	float r2 = sqrt((r.w * r.w + r.h * r.h) * 0.25f) + c.r;
+
+	//Use half width and height squared as a radius, before heavier calculations
+	if ((vecx * vecx + vecy * vecy) <= (r2 * r2)) return false;
+
 	float ang_ex = atan2f(vecy, vecx);
 	float dist = sqrtf(vecx * vecx + vecy * vecy);
 	vecx = dist * cosf(ang_ex - r.d);
