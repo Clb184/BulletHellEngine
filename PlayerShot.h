@@ -82,7 +82,7 @@ inline bool RegisterPlayerShotClass(HSQUIRRELVM v) {
 	sq_pushstring(v, "PlayerShot", -1);
 	create_class = SQ_SUCCEEDED(sq_newclass(v, FALSE));
 	PlayerShotMemberSetup(v);
-	RegisterSQClassFunc(v, Task_Constructor<PlayerShot, CreatePlayerShot, PlayerShotListSetup, PlayerShotInitialize>, "constructor");
+	RegisterSQClassFunc(v, Task_Constructor<PlayerShot, PlayerShotManager, &g_PlayerShotManager, PlayerShotListSetup, PlayerShotInitialize>, "constructor");
 	RegisterSQClassFunc(v, Task_Kill, "Kill");
 	RegisterSQClassFunc(v, Task2D_SetPos, "SetPos");
 	RegisterSQClassFunc(v, Task2D_SetSize, "SetSize");

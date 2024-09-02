@@ -68,12 +68,13 @@ static void EnmInitialize(HSQUIRRELVM v, Node<Enemy>* pTask) {
 SQInteger Enemy_SetLife(HSQUIRRELVM v);
 SQInteger Enemy_GetLife(HSQUIRRELVM v);
 
+
 inline bool RegisterEnemyClass(HSQUIRRELVM v) {
 	bool create_class = false;
 	sq_pushstring(v, "Enemy", -1);
 	create_class = SQ_SUCCEEDED(sq_newclass(v, FALSE));
 	EnmMemberSetup(v);
-	RegisterSQClassFunc(v, Task_Constructor<Enemy, CreateEnemy, EnmListSetup, EnmInitialize>, "constructor");
+	RegisterSQClassFunc(v, Task_Constructor<Enemy, EnemyManager, &g_EnmManager, EnmListSetup, EnmInitialize>, "constructor");
 	RegisterSQClassFunc(v, Task_Kill, "Kill");
 	RegisterSQClassFunc(v, Task2D_SetPos, "SetPos");
 	RegisterSQClassFunc(v, Task2D_SetSize, "SetSize");

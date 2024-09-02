@@ -78,7 +78,7 @@ inline bool RegisterBulletClass(HSQUIRRELVM v) {
 	sq_pushstring(v, "Bullet", -1);
 	create_class = SQ_SUCCEEDED(sq_newclass(v, FALSE));
 	BulletMemberSetup(v);
-	RegisterSQClassFunc(v, Task_Constructor<Bullet, CreateBullet, BulletListSetup, BulletInitialize>, "constructor");
+	RegisterSQClassFunc(v, Task_Constructor<Bullet, BulletManager, &g_BulletManager, BulletListSetup, BulletInitialize>, "constructor");
 	RegisterSQClassFunc(v, Task_Kill, "Kill");
 	RegisterSQClassFunc(v, Task2D_SetPos, "SetPos");
 	RegisterSQClassFunc(v, Task2D_SetSize, "SetSize");

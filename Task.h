@@ -46,7 +46,7 @@ On each class register for tasks, you enter the following:
 -The list setup (You need to push the root table and manage yourself)
 -The member initializer (and caching? if you want, in this case, the instance is pushed before)
 */
-template <class T, Node<T>* (*generator)(), void (*list_setup)(HSQUIRRELVM, Node<T>*), void (*initializer)(HSQUIRRELVM, Node<T>*)>
+template <class T, class L, L* list, void (*list_setup)(HSQUIRRELVM, Node<T>*), void (*initializer)(HSQUIRRELVM, Node<T>*)>
 static SQInteger Task_Constructor(HSQUIRRELVM v) {
 	union {
 		SQUserPointer pData;
@@ -56,7 +56,7 @@ static SQInteger Task_Constructor(HSQUIRRELVM v) {
 	SQInteger numparams;
 
 	if (top >= 2 && (sq_gettype(v, 2) == OT_CLOSURE)) {
-		pTask = generator();
+		pTask = list->CreateObject();
 		if (!pTask) return 0;
 		sq_setinstanceup(v, 1, pData);
 		sq_setreleasehook(v, 1, DummyRelease);
