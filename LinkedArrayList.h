@@ -147,7 +147,6 @@ CDoubleLinkedArrayList<T>::CDoubleLinkedArrayList(size_t num_items, CMemoryPool<
     m_ListSize = 0;
     m_Iterator = m_pHead;
     m_NumElements = num_items;
-
     BlockState<Node<T>>* pBlock= mem_pool->RequestData(num_items);
     m_ArrayListData = pBlock->pBlock;
     m_pPool = pBlock;

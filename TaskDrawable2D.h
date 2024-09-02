@@ -20,10 +20,6 @@ struct TaskDrawable3D : Task {
 	glm::mat4 transform;
 };
 
-extern CMemoryPool<Node<TaskDrawable2D>> g_TaskDrawable2DPool;
-extern CMemoryPool<Node<TaskDrawable3D>> g_TaskDrawable3DPool;
-
-
 struct TaskCollideableCircle : TaskDrawable2D {
 	CollissionCircle co_shape;
 	bool is_hit = false;
@@ -34,10 +30,13 @@ public:
 	Task2DManager();
 	~Task2DManager();
 
-	void Initialize();
+	void Initialize() {}
+	void Initialize(const SQChar* sq_list);
 	void Move();
 	void Draw();
 
+	int GetItemCnt() const;
+	Node<TaskDrawable2D>* CreateObject();
 private:
 };
 
@@ -61,5 +60,36 @@ SQInteger Task2D_SetRotation(HSQUIRRELVM v);
 SQInteger Task2D_SetUV(HSQUIRRELVM v);
 
 SQInteger Collision_SetRadius(HSQUIRRELVM v);
+
+
+template<const char* name>
+static void Task2DListSetup(HSQUIRRELVM v, Node<TaskDrawable2D>* pTask) {
+
+	sq_pushroottable(v);
+	sq_pushstring(v, _SC(name), -1);
+	sq_get(v, -2);
+	sq_pushinteger(v, pTask->id);
+	sq_move(v, v, 1);
+	sq_set(v, -3);
+	sq_pop(v, 2);
+}
+
+template<TaskDrawable2D* TaskList, const char* name, const char* sq_list>
+inline bool RegisterEnemyClass(HSQUIRRELVM v) {
+	bool create_class = false;
+	sq_pushstring(v, name, -1);
+	create_class = SQ_SUCCEEDED(sq_newclass(v, FALSE));
+	Task2DMemberSetup(v);
+	RegisterSQClassFunc(v, Task_Constructor<TaskDrawable2D, Task2DManager, TaskList, Task2DListSetup<sq_list>, Task2DInitialize>, "constructor");
+	RegisterSQClassFunc(v, Task_Kill, "Kill");
+	RegisterSQClassFunc(v, Task2D_SetPos, "SetPos");
+	RegisterSQClassFunc(v, Task2D_SetSize, "SetSize");
+	RegisterSQClassFunc(v, Task2D_SetScale, "SetScale");
+	RegisterSQClassFunc(v, Task2D_SetUV, "SetUV");
+	RegisterSQClassFunc(v, Task2D_SetRotation, "SetRotation");
+	RegisterSQClassFunc(v, Collision_SetRadius, "SetRadius");
+	create_class &= SQ_SUCCEEDED(sq_newslot(v, -3, SQFalse));
+	return create_class;
+}
 
 #endif

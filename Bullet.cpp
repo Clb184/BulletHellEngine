@@ -1,8 +1,6 @@
 #include "Bullet.h"
+#include "GameMain.h"
 #include "Player.h"
-
-static CMemoryPool<Node<Bullet>> g_TaskBulletPool;
-BulletManager g_BulletManager;
 
 BulletManager::BulletManager() :
 	CDrawableManager<Bullet>(BULLET_MAX, &g_TaskBulletPool)

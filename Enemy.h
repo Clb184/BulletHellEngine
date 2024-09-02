@@ -9,8 +9,6 @@ struct Enemy : TaskCollideableCircle {
 	int life = 100;
 };
 
-extern CMemoryPool<Node<Enemy>> g_TaskEnemyPool;
-
 class EnemyManager : public CDrawableManager<Enemy> {
 public:
 	EnemyManager();
@@ -39,12 +37,6 @@ private:
 #endif
 };
 
-extern EnemyManager g_EnmManager;
-
-static Node<Enemy>* CreateEnemy() {
-	return g_EnmManager.CreateObject();
-}
-
 inline void EnmMemberSetup(HSQUIRRELVM v) {
 	Task2DMemberSetup(v);
 }
@@ -68,13 +60,13 @@ static void EnmInitialize(HSQUIRRELVM v, Node<Enemy>* pTask) {
 SQInteger Enemy_SetLife(HSQUIRRELVM v);
 SQInteger Enemy_GetLife(HSQUIRRELVM v);
 
-
+template<EnemyManager* EnmList>
 inline bool RegisterEnemyClass(HSQUIRRELVM v) {
 	bool create_class = false;
 	sq_pushstring(v, "Enemy", -1);
 	create_class = SQ_SUCCEEDED(sq_newclass(v, FALSE));
 	EnmMemberSetup(v);
-	RegisterSQClassFunc(v, Task_Constructor<Enemy, EnemyManager, &g_EnmManager, EnmListSetup, EnmInitialize>, "constructor");
+	RegisterSQClassFunc(v, Task_Constructor<Enemy, EnemyManager, EnmList, EnmListSetup, EnmInitialize>, "constructor");
 	RegisterSQClassFunc(v, Task_Kill, "Kill");
 	RegisterSQClassFunc(v, Task2D_SetPos, "SetPos");
 	RegisterSQClassFunc(v, Task2D_SetSize, "SetSize");

@@ -3,12 +3,11 @@
 #include "TaskDrawable2D.h"
 #include "HitCalc.h"
 
-#define BULLET_MAX (2048)
+#define BULLET_MAX (2048 * 5)
 
 struct Bullet : TaskCollideableCircle {
 };
 
-extern CMemoryPool<Node<Bullet>> g_TaskBulletPool;
 
 class BulletManager : public CDrawableManager<Bullet> {
 public:
@@ -37,18 +36,13 @@ private:
 #endif
 };
 
-extern BulletManager g_BulletManager;
-
+template<BulletManager* BulletMan>
 static SQInteger SetBulletTexture(HSQUIRRELVM v) {
 	const SQChar* pName;
 	if ((sq_gettop(v) == 2) && (SQ_SUCCEEDED(sq_getstring(v, -1, &pName)))) {
-		g_BulletManager.SetTexture(pName);
+		BulletMan->SetTexture(pName);
 	}
 	return 0;
-}
-
-static Node<Bullet>* CreateBullet() {
-	return g_BulletManager.CreateObject();
 }
 
 inline void BulletMemberSetup(HSQUIRRELVM v) {
@@ -71,14 +65,15 @@ static void BulletInitialize(HSQUIRRELVM v, Node<Bullet>* pTask) {
 	pTask->co_shape.pos = pTask->pos;
 }
 
+template <BulletManager* BulletList>
 inline bool RegisterBulletClass(HSQUIRRELVM v) {
-	RegisterSQFunc(v, SetBulletTexture, "SetBulletTexture");
+	RegisterSQFunc(v, SetBulletTexture<BulletList>, "SetBulletTexture");
 
 	bool create_class = false;
 	sq_pushstring(v, "Bullet", -1);
 	create_class = SQ_SUCCEEDED(sq_newclass(v, FALSE));
 	BulletMemberSetup(v);
-	RegisterSQClassFunc(v, Task_Constructor<Bullet, BulletManager, &g_BulletManager, BulletListSetup, BulletInitialize>, "constructor");
+	RegisterSQClassFunc(v, Task_Constructor<Bullet, BulletManager, BulletList, BulletListSetup, BulletInitialize>, "constructor");
 	RegisterSQClassFunc(v, Task_Kill, "Kill");
 	RegisterSQClassFunc(v, Task2D_SetPos, "SetPos");
 	RegisterSQClassFunc(v, Task2D_SetSize, "SetSize");

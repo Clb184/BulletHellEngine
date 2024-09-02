@@ -38,8 +38,6 @@ private:
 #endif
 };
 
-extern Player g_Player;
-
 SQInteger Player_SetPos(HSQUIRRELVM v);
 SQInteger Player_SetSize(HSQUIRRELVM v);
 SQInteger Player_SetScale(HSQUIRRELVM v);

@@ -9,7 +9,6 @@ struct PlayerShot : TaskCollideableCircle {
 	int damage = 1;
 };
 
-extern CMemoryPool<Node<PlayerShot>> g_TaskPlayerShotPool;
 
 class PlayerShotManager : public CDrawableManager<PlayerShot> {
 public:
@@ -39,18 +38,13 @@ private:
 #endif
 };
 
-extern PlayerShotManager g_PlayerShotManager;
-
+template<PlayerShotManager* TaskList>
 static SQInteger SetPlayerShotTexture(HSQUIRRELVM v) {
 	const SQChar* pName;
 	if ((sq_gettop(v) == 2) && (SQ_SUCCEEDED(sq_getstring(v, -1, &pName)))) {
-		g_PlayerShotManager.SetTexture(pName);
+		TaskList->SetTexture(pName);
 	}
 	return 0;
-}
-
-static Node<PlayerShot>* CreatePlayerShot() {
-	return g_PlayerShotManager.CreateObject();
 }
 
 inline void PlayerShotMemberSetup(HSQUIRRELVM v) {
@@ -75,14 +69,15 @@ static void PlayerShotInitialize(HSQUIRRELVM v, Node<PlayerShot>* pTask) {
 
 SQInteger PlayerShot_SetDamage(HSQUIRRELVM v);
 
+template <PlayerShotManager* PlayerShotList>
 inline bool RegisterPlayerShotClass(HSQUIRRELVM v) {
-	RegisterSQFunc(v, SetPlayerShotTexture, "SetPlayerShotTexture");
+	RegisterSQFunc(v, SetPlayerShotTexture<PlayerShotList>, "SetPlayerShotTexture");
 
 	bool create_class = false;
 	sq_pushstring(v, "PlayerShot", -1);
 	create_class = SQ_SUCCEEDED(sq_newclass(v, FALSE));
 	PlayerShotMemberSetup(v);
-	RegisterSQClassFunc(v, Task_Constructor<PlayerShot, PlayerShotManager, &g_PlayerShotManager, PlayerShotListSetup, PlayerShotInitialize>, "constructor");
+	RegisterSQClassFunc(v, Task_Constructor<PlayerShot, PlayerShotManager, PlayerShotList, PlayerShotListSetup, PlayerShotInitialize>, "constructor");
 	RegisterSQClassFunc(v, Task_Kill, "Kill");
 	RegisterSQClassFunc(v, Task2D_SetPos, "SetPos");
 	RegisterSQClassFunc(v, Task2D_SetSize, "SetSize");

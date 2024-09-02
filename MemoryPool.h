@@ -18,11 +18,13 @@ public:
 
 	BlockState<T>* RequestData(size_t item_cnt);
 	void FreeData();
+	bool IsInitialized() const;
 private:
 	BlockState<T>* AddNewBlock();
 	bool Expand();
 	void Cleanup();
 private:
+	bool m_bInitialized = false;
 	BlockState<T>** m_pBlocks;
 	size_t m_NumBlocks;
 	size_t m_AllocBlocks;
@@ -30,6 +32,7 @@ private:
 
 template<class T>
 CMemoryPool<T>::CMemoryPool() {
+	if (m_bInitialized) return;
 	const size_t start_data = 1;
 	m_pBlocks = new BlockState<T>*[start_data];
 	m_pBlocks[0] = new BlockState<T>;
@@ -62,6 +65,11 @@ void CMemoryPool<T>::FreeData() {
 			}
 		}
 	}
+}
+
+template<class T>
+bool CMemoryPool<T>::IsInitialized() const {
+	return m_bInitialized;
 }
 
 template<class T>

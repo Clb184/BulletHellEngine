@@ -1,9 +1,6 @@
 #include "PlayerShot.h"
-#include "Player.h"
-#include "Enemy.h"
+#include "GameMain.h"
 
-static CMemoryPool<Node<PlayerShot>> g_TaskPlayerShotPool;
-PlayerShotManager g_PlayerShotManager;
 
 
 PlayerShotManager::PlayerShotManager() :

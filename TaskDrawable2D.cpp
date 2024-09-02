@@ -1,7 +1,5 @@
 #include "TaskDrawable2D.h"
-
-static CMemoryPool<Node<TaskDrawable2D>> g_TaskDrawable2DPool;
-static CMemoryPool<Node<TaskDrawable3D>> g_TaskDrawable3DPool;
+#include "GameMain.h"
 
 Task2DManager::Task2DManager() :
 	CDrawableManager<TaskDrawable2D>(TASK2D_MAX, &g_TaskDrawable2DPool)
@@ -14,9 +12,9 @@ Task2DManager::~Task2DManager()
 
 }
 
-void Task2DManager::Initialize() {
+void Task2DManager::Initialize(const SQChar* sq_list) {
 	if (m_VM) {
-		m_ArrayObj = SQCreateArray(m_VM, _SC("____tsk2d"), TASK2D_MAX);
+		m_ArrayObj = SQCreateArray(m_VM, sq_list, TASK2D_MAX);
 	}
 }
 
@@ -36,7 +34,6 @@ void Task2DManager::Move() {
 
 
 void Task2DManager::Draw() {
-	static Clb184::CD3DSprite spr;
 	if (!m_TaskList.GetSize())
 		return;
 
@@ -45,13 +42,18 @@ void Task2DManager::Draw() {
 	it.MoveFront();
 	while ((pInst = it.GetData()) && pInst->active) {
 		TaskDrawable2D test = *pInst;
-		spr.SetPos(test.pos);
-		spr.SetRotation(test.rotation);
 
-		spr.Draw();
 		it.MoveFront();
 	}
 
+}
+
+int Task2DManager::GetItemCnt() const {
+	return m_TaskList.GetSize();
+}
+
+Node<TaskDrawable2D>* Task2DManager::CreateObject() {
+	return m_TaskList.AddFront();
 }
 
 SQInteger Task2D_SetPos(HSQUIRRELVM v) {

@@ -17,7 +17,7 @@ function main(){
     LoadMusic("music/plastic_space.ogg");
     LoadMusic("music/STAGE_00.ogg");
     //LoadMusic("music/ex_3.ogg");
-    PlayMusic();
+    //PlayMusic();
     wait(60);
     Enemy(testing, 0.0, 150.0, 20.0, sumi, vec2t(96.0, 96.0), sumi_spr);
     wait(800);
@@ -66,7 +66,7 @@ function testing(x, y, c, tex, size,  uv) {
         SetPos(vec2t(x, ny));
         if (i == 300){
             Bullet(bullet_test, x, ny, PI * 0.5, 5.0);
-            for (local j = 0; j < 128; j++) {
+            for (local j = 0; j < 2048; j++) {
                 Bullet(bullet_test, x, ny, (rand() % 360).tofloat() * 3.1415926 / 180.0, 0.1);
                 //print("j: " + j + "\n");
             }

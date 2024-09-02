@@ -1,8 +1,8 @@
 #include "Enemy.h"
 #include "Player.h"
+#include "GameMain.h"
 
-static CMemoryPool<Node<Enemy>> g_TaskEnemyPool;
-EnemyManager g_EnmManager;
+//EnemyManager g_EnmManager;
 
 EnemyManager::EnemyManager() :
 	CDrawableManager<Enemy>(ENEMY_MAX, &g_TaskEnemyPool)

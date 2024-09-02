@@ -1,4 +1,19 @@
 #include "GameMain.h"
+CMemoryPool<Node<TaskDrawable2D>> g_TaskDrawable2DPool;
+CMemoryPool<Node<TaskDrawable3D>> g_TaskDrawable3DPool;
+CMemoryPool<Node<Enemy>> g_TaskEnemyPool; 
+CMemoryPool<Node<Bullet>> g_TaskBulletPool; 
+CMemoryPool<Node<PlayerShot>> g_TaskPlayerShotPool;
+
+Task2DManager g_FX0;
+EnemyManager g_EnmManager;
+Task2DManager g_FX1;
+Player g_Player;
+Task2DManager g_FX2;
+PlayerShotManager g_PlayerShotManager;
+Task2DManager g_FX3;
+BulletManager g_BulletManager;
+Task2DManager g_FX4;
 
 GameMain::GameMain() {
 	m_GlobalTime = 0.0;
@@ -38,8 +53,8 @@ void GameMain::Initialize(const char* filename) {
 	sq_newarray(m_VM, ENEMY_MAX);
 	sq_newslot(m_VM, -3, SQFalse);*/
 	RegisterSQFunc(m_VM, PrintCallStack, "PrintCallStack");
-	RegisterEnemyClass(m_VM);
-	RegisterBulletClass(m_VM);
+	RegisterEnemyClass<&g_EnmManager>(m_VM);
+	RegisterBulletClass<&g_BulletManager>(m_VM);
 	RegisterLinearAlgebraClass(m_VM);
 	RegisterTextureClass(m_VM);
 	RegisterAudio(m_VM);

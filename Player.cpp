@@ -1,8 +1,7 @@
 #include "Player.h"
 #include "PlayerShot.h"
+#include "GameMain.h"
 #include "Audio.h"
-
-Player g_Player;
 
 Player::Player() {
 	m_VM = nullptr;
@@ -47,7 +46,7 @@ void Player::Initialize(const SQChar* fname) {
 	RegisterSQFunc(m_VM, PrintCallStack, "PrintCallStack");
 	RegisterLinearAlgebraClass(m_VM);
 	RegisterTextureClass(m_VM);
-	RegisterPlayerShotClass(m_VM);
+	RegisterPlayerShotClass<&g_PlayerShotManager>(m_VM);
 	RegisterAudio(m_VM);
 	sq_pop(m_VM, 1);
 	CompileMemSQScript(
