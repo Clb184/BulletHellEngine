@@ -4,20 +4,12 @@
 #include "SqHandlers.h"
 #include "sq_linalg.h"
 #include "ClbLibMain.h"
-#include "Graphics.h"
 #include "CManagerBase.h"
 #include "CDrawableManager.h"
 #include "LinkedArrayList.h"
 #include "MemoryPool.h"
-#include "HitCalc.h"
 
 #define TASK_MAX (512)
-#define TASK2D_MAX (256)
-
-struct VMInstance {
-	HSQUIRRELVM thread = nullptr;
-	bool is_newcall = false;
-};
 
 struct Task {
 	bool is_delete = false;
@@ -32,24 +24,6 @@ struct Task {
 	SQInteger count;
 };
 
-struct TaskDrawable2D : Task {
-	glm::vec2 pos = {0.0f, 0.0f};
-	glm::vec2 size = {32.0f, 32.0f};
-	glm::vec2 scale = {1.0f, 1.0f};
-	float rotation = 0.0f;
-	glm::vec4 uv = { 0.0f, 0.0f, 1.0f, 1.0f };
-	uint32_t color = 0xffffffff;
-};
-
-struct TaskDrawable3D : Task {
-	glm::vec3 pos;
-	glm::mat4 transform;
-};
-
-struct TaskCollideableCircle : TaskDrawable2D {
-	CollissionCircle co_shape;
-	bool is_hit = false;
-};
 
 static SQInteger DummyRelease(SQUserPointer, SQInteger) {
 	return SQ_OK;
@@ -63,17 +37,6 @@ inline bool TaskMemberSetup(HSQUIRRELVM v) {
 	return member_set;
 }
 
-inline bool Task2DMemberSetup(HSQUIRRELVM v) {
-	bool member_set = TaskMemberSetup(v);
-	sq_pushstring(v, _SC("texture"), -1);
-	sq_pushnull(v);
-	member_set &= SQ_SUCCEEDED(sq_newslot(v, -3, SQFalse));
-	return member_set;
-}
-
-static void Task2DInitialize(HSQUIRRELVM v, Node<TaskDrawable2D>* pTask) {
-	//pTask->texture_handle = SQGetObjectByName(v, _SC("texture"));
-}
 
 /*
 Setup a task, avoiding inheritance or at least trying so
@@ -131,13 +94,6 @@ SQInteger Task_GetParent(HSQUIRRELVM v);
 SQInteger Task_GetChild(HSQUIRRELVM v);
 SQInteger Task_Kill(HSQUIRRELVM v);
 
-SQInteger Task2D_SetPos(HSQUIRRELVM v);
-SQInteger Task2D_SetSize(HSQUIRRELVM v);
-SQInteger Task2D_SetScale(HSQUIRRELVM v);
-SQInteger Task2D_SetRotation(HSQUIRRELVM v);
-SQInteger Task2D_SetUV(HSQUIRRELVM v);
-
-SQInteger Collision_SetRadius(HSQUIRRELVM v);
 
 template <class T>
 inline void MoveTask(HSQUIRRELVM v, Node<T>* pTask, CDoubleLinkedArrayList<T>* pList, HSQOBJECT arrayobj) {
@@ -171,10 +127,6 @@ inline void MoveTask(HSQUIRRELVM v, Node<T>* pTask, CDoubleLinkedArrayList<T>* p
 }
 
 extern CMemoryPool<Node<Task>> g_TaskPool;
-extern CMemoryPool<Node<TaskDrawable2D>> g_TaskDrawable2DPool;
-extern CMemoryPool<Node<TaskDrawable3D>> g_TaskDrawable3DPool;
-
-
 
 class TaskManager : public CManagerBase<Task> {
 public:
@@ -186,17 +138,4 @@ public:
 	int GetItemCnt() const;
 private:
 };
-
-class Task2DManager : public CDrawableManager<TaskDrawable2D> {
-public:
-	Task2DManager();
-	~Task2DManager();
-
-	void Initialize();
-	void Move();
-	void Draw();
-
-private:
-};
-
 #endif

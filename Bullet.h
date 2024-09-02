@@ -1,6 +1,6 @@
 #ifndef BULLET_INCLUDED
 #define BULLET_INCLUDED
-#include "Task.h"
+#include "TaskDrawable2D.h"
 #include "HitCalc.h"
 
 #define BULLET_MAX (2048)

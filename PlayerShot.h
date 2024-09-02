@@ -1,6 +1,6 @@
 #ifndef PLAYERSHOT_INCLUDED
 #define PLAYERSHOT_INCLUDED
-#include "Task.h"
+#include "TaskDrawable2D.h"
 #include "HitCalc.h"
 
 #define PLAYERSHOT_MAX (512)

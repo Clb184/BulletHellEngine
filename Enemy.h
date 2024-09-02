@@ -1,6 +1,6 @@
 #ifndef ENEMY_INCLUDED
 #define ENEMY_INCLUDED
-#include "Task.h"
+#include "TaskDrawable2D.h"
 #include "HitCalc.h"
 
 #define ENEMY_MAX 1024

@@ -1,6 +1,6 @@
 #ifndef PLAYER_INCLUDED
 #define PLAYER_INCLUDED
-#include "Task.h"
+#include "TaskDrawable2D.h"
 #include "Tex.h"
 #include "HitCalc.h"
 #include <Xinput.h>
