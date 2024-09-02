@@ -1,5 +1,6 @@
 #include "Player.h"
 #include "PlayerShot.h"
+#include "Audio.h"
 
 Player g_Player;
 
@@ -13,7 +14,9 @@ Player::Player() {
 	m_IsInvincible = false;
 	m_MutekiTime = 0;
 	m_WaitNextLife = 0;
+#ifdef DEBUG
 	m_bDebugDrawEnable = true;
+#endif
 }
 
 Player::~Player() {
@@ -45,6 +48,7 @@ void Player::Initialize(const SQChar* fname) {
 	RegisterLinearAlgebraClass(m_VM);
 	RegisterTextureClass(m_VM);
 	RegisterPlayerShotClass(m_VM);
+	RegisterAudio(m_VM);
 	sq_pop(m_VM, 1);
 	CompileMemSQScript(
 		" function wait(t) {              "
@@ -92,7 +96,7 @@ void Player::Initialize(const SQChar* fname) {
 		PrintStack(m_VM);
 		sq_pop(m_VM, 1);
 
-		g_PlayerShotManager.SetShotVM(m_VM);
+		CManagerBase<PlayerShot>::SetVM(m_VM);
 		g_PlayerShotManager.Initialize();
 
 		m_VBuffer.SetStrideInfo(sizeof(Clb184::Vertex2D));
@@ -100,6 +104,7 @@ void Player::Initialize(const SQChar* fname) {
 		m_PlayerTexture.CreateEmptyTexture(256, 256, 0xffffffff);
 		//Finally, initialize script
 		CallNPSQFunc(m_VM, "main");
+#ifdef DEBUG
 		constexpr float delta = 3.14159 / 8.0;
 		float ang = 0.0f;
 		for (int i = 0; i < 16; i++) {
@@ -109,6 +114,7 @@ void Player::Initialize(const SQChar* fname) {
 		m_Points[16] = m_Points[0];
 		m_PrimBuffer.SetStrideInfo(sizeof(Clb184::Point2D));
 		m_PrimBuffer.Initialize(nullptr, sizeof(Clb184::Point2D) * 17, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+#endif
 
 	}
 }
@@ -249,28 +255,29 @@ void Player::Draw() {
 	}
 	sq_pop(m_VM, 2);
 
+#ifdef DEBUG
 	if (m_bDebugDrawEnable) {
 		Clb184::Point2D* pPoints = (Clb184::Point2D*)m_PrimBuffer.Lock();
-		pPoints[0] = { m_Points[0] * co_shape.r + pos, 0x8c1414ff };
-		pPoints[0 + 1] = { m_Points[1] * co_shape.r + pos, 0x8c1414ff };
-		pPoints[0 + 2] = { m_Points[2] * co_shape.r + pos, 0x8c1414ff };
-		pPoints[0 + 3] = { m_Points[3] * co_shape.r + pos, 0x8c1414ff };
-		pPoints[0 + 4] = { m_Points[4] * co_shape.r + pos, 0x8c1414ff };
-		pPoints[0 + 5] = { m_Points[5] * co_shape.r + pos, 0x8c1414ff };
-		pPoints[0 + 6] = { m_Points[6] * co_shape.r + pos, 0x8c1414ff };
-		pPoints[0 + 7] = { m_Points[7] * co_shape.r + pos, 0x8c1414ff };
-		pPoints[0 + 8] = { m_Points[8] * co_shape.r + pos, 0x8c1414ff };
-		pPoints[0 + 9] = { m_Points[9] * co_shape.r + pos, 0x8c1414ff };
-		pPoints[0 + 10] = { m_Points[10] * co_shape.r + pos, 0x8c1414ff };
-		pPoints[0 + 11] = { m_Points[11] * co_shape.r + pos, 0x8c1414ff };
-		pPoints[0 + 12] = { m_Points[12] * co_shape.r + pos, 0x8c1414ff };
-		pPoints[0 + 13] = { m_Points[13] * co_shape.r + pos, 0x8c1414ff };
-		pPoints[0 + 14] = { m_Points[14] * co_shape.r + pos, 0x8c1414ff };
-		pPoints[0 + 15] = { m_Points[15] * co_shape.r + pos, 0x8c1414ff };
-		pPoints[0 + 16] = { m_Points[16] * co_shape.r + pos, 0x8c1414ff };
+		pPoints[0] = { m_Points[0] * co_shape.r + pos,       HITBOX_COLOR };
+		pPoints[0 + 1] = { m_Points[1] * co_shape.r + pos,   HITBOX_COLOR };
+		pPoints[0 + 2] = { m_Points[2] * co_shape.r + pos,   HITBOX_COLOR };
+		pPoints[0 + 3] = { m_Points[3] * co_shape.r + pos,   HITBOX_COLOR };
+		pPoints[0 + 4] = { m_Points[4] * co_shape.r + pos,   HITBOX_COLOR };
+		pPoints[0 + 5] = { m_Points[5] * co_shape.r + pos,   HITBOX_COLOR };
+		pPoints[0 + 6] = { m_Points[6] * co_shape.r + pos,   HITBOX_COLOR };
+		pPoints[0 + 7] = { m_Points[7] * co_shape.r + pos,   HITBOX_COLOR };
+		pPoints[0 + 8] = { m_Points[8] * co_shape.r + pos,   HITBOX_COLOR };
+		pPoints[0 + 9] = { m_Points[9] * co_shape.r + pos,   HITBOX_COLOR };
+		pPoints[0 + 10] = { m_Points[10] * co_shape.r + pos, HITBOX_COLOR };
+		pPoints[0 + 11] = { m_Points[11] * co_shape.r + pos, HITBOX_COLOR };
+		pPoints[0 + 12] = { m_Points[12] * co_shape.r + pos, HITBOX_COLOR };
+		pPoints[0 + 13] = { m_Points[13] * co_shape.r + pos, HITBOX_COLOR };
+		pPoints[0 + 14] = { m_Points[14] * co_shape.r + pos, HITBOX_COLOR };
+		pPoints[0 + 15] = { m_Points[15] * co_shape.r + pos, HITBOX_COLOR };
+		pPoints[0 + 16] = { m_Points[16] * co_shape.r + pos, HITBOX_COLOR };
 		m_PrimBuffer.Unlock(sizeof(Clb184::Point2D) * 17);
 	}
-
+#endif
 }
 
 void Player::Kill() {
@@ -288,20 +295,19 @@ void Player::Kill() {
 		CallNPSQFunc(m_VM, "OnDeath");
 	}
 }
-
+#ifdef DEBUG
 void Player::DrawHitbox() {
-	if (m_bDebugDrawEnable) {
-		Clb184::g_pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
-		Clb184::CDefault2DShader::GetShaderInstance().BindTexturelessVertexShader();
-		Clb184::CDefault2DShader::GetShaderInstance().BindTexturelessPixelShader();
-		m_PrimBuffer.BindToContext(0, 0);
-		Clb184::g_pContext->Draw(17, 0);
-	}
+	Clb184::g_pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
+	Clb184::CDefault2DShader::GetShaderInstance().BindTexturelessVertexShader();
+	Clb184::CDefault2DShader::GetShaderInstance().BindTexturelessPixelShader();
+	m_PrimBuffer.BindToContext(0, 0);
+	Clb184::g_pContext->Draw(17, 0);
 }
 
 void Player::SetDebugDraw(bool state) {
 	m_bDebugDrawEnable = state;
 }
+#endif
 
 SQInteger Player_SetPos(HSQUIRRELVM v) {
 	union {

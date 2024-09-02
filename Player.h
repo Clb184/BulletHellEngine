@@ -31,9 +31,11 @@ private:
 	Clb184::CVertexBuffer m_VBuffer;
 	Clb184::CTexture m_PlayerTexture;
 
+#ifdef DEBUG
 	bool m_bDebugDrawEnable;
 	glm::vec2 m_Points[17];
 	Clb184::CVertexBuffer m_PrimBuffer;
+#endif
 };
 
 extern Player g_Player;

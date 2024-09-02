@@ -5,10 +5,12 @@ static CMemoryPool<Node<Bullet>> g_TaskBulletPool;
 BulletManager g_BulletManager;
 
 BulletManager::BulletManager() :
-	m_TaskList(BULLET_MAX, &g_TaskBulletPool)
+	CDrawableManager<Bullet>(BULLET_MAX, &g_TaskBulletPool)
 {
+#ifdef DEBUG
 	m_bDebugDrawEnable = true;
 	m_Count = 0;
+#endif
 }
 
 BulletManager::~BulletManager() {
@@ -38,6 +40,7 @@ void BulletManager::Initialize() {
 		m_ArrayObj = SQCreateArray(m_VM, _SC("____blt"), BULLET_MAX);
 		sq_pop(m_VM, 1);
 
+#ifdef DEBUG
 		m_PrimBuffer.SetStrideInfo(sizeof(Clb184::Point2D));
 		m_PrimBuffer.Initialize(nullptr, sizeof(Clb184::Point2D) * 17 * BULLET_MAX, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
 		constexpr float delta = 3.14159 / 8.0;
@@ -49,6 +52,7 @@ void BulletManager::Initialize() {
 		}
 		m_Points[16] = m_Points[0];
 		m_Count = 0;
+#endif
 	}
 }
 
@@ -59,7 +63,9 @@ void BulletManager::Move() {
 	Iterator<Bullet> it = *m_TaskList.GetBackIterator();
 	CollissionCircle phit = g_Player.co_shape;
 	it.MoveFront();
-	while ((pInst = it.GetData()) && pInst->active) {
+	int i = 0;
+	int max = m_TaskList.GetSize();
+	while ((pInst = it.GetData()) && pInst->active && i < max) {
 		//Enemy test = *pInst;
 		MoveTask(m_VM, pInst, &m_TaskList, m_ArrayObj);
 		pInst->co_shape.pos = pInst->pos;
@@ -68,7 +74,8 @@ void BulletManager::Move() {
 			g_Player.Kill();
 			//sq_getprintfunc(m_VM)(m_VM, "hit!\n");
 		}
-		it.MoveFront();
+		it.MoveFront(); 
+		i++;
 	}
 }
 
@@ -76,7 +83,9 @@ void BulletManager::Draw() {
 	int cnt = 0;
 
 	if (!m_TaskList.GetSize() || !m_VM) {
+#ifdef DEBUG
 		m_Count = 0;
+#endif
 		return;
 	}
 
@@ -122,23 +131,23 @@ void BulletManager::Draw() {
 
 #ifdef DEBUG
 		if (m_bDebugDrawEnable) {
-			pPoints[(cnt * 17)] = { m_Points[0].Pos * test.co_shape.r + test.pos,       0x8c1414ff };
-			pPoints[(cnt * 17) + 1] = { m_Points[1].Pos * test.co_shape.r + test.pos,   0x8c1414ff };
-			pPoints[(cnt * 17) + 2] = { m_Points[2].Pos * test.co_shape.r + test.pos,   0x8c1414ff };
-			pPoints[(cnt * 17) + 3] = { m_Points[3].Pos * test.co_shape.r + test.pos,   0x8c1414ff };
-			pPoints[(cnt * 17) + 4] = { m_Points[4].Pos * test.co_shape.r + test.pos,   0x8c1414ff };
-			pPoints[(cnt * 17) + 5] = { m_Points[5].Pos * test.co_shape.r + test.pos,   0x8c1414ff };
-			pPoints[(cnt * 17) + 6] = { m_Points[6].Pos * test.co_shape.r + test.pos,   0x8c1414ff };
-			pPoints[(cnt * 17) + 7] = { m_Points[7].Pos * test.co_shape.r + test.pos,   0x8c1414ff };
-			pPoints[(cnt * 17) + 8] = { m_Points[8].Pos * test.co_shape.r + test.pos,   0x8c1414ff };
-			pPoints[(cnt * 17) + 9] = { m_Points[9].Pos * test.co_shape.r + test.pos,   0x8c1414ff };
-			pPoints[(cnt * 17) + 10] = { m_Points[10].Pos * test.co_shape.r + test.pos, 0x8c1414ff };
-			pPoints[(cnt * 17) + 11] = { m_Points[11].Pos * test.co_shape.r + test.pos, 0x8c1414ff };
-			pPoints[(cnt * 17) + 12] = { m_Points[12].Pos * test.co_shape.r + test.pos, 0x8c1414ff };
-			pPoints[(cnt * 17) + 13] = { m_Points[13].Pos * test.co_shape.r + test.pos, 0x8c1414ff };
-			pPoints[(cnt * 17) + 14] = { m_Points[14].Pos * test.co_shape.r + test.pos, 0x8c1414ff };
-			pPoints[(cnt * 17) + 15] = { m_Points[15].Pos * test.co_shape.r + test.pos, 0x8c1414ff };
-			pPoints[(cnt * 17) + 16] = { m_Points[16].Pos * test.co_shape.r + test.pos, 0x8c1414ff };
+			pPoints[(cnt * 17)] = { m_Points[0].Pos * test.co_shape.r + test.pos,       HITBOX_COLOR };
+			pPoints[(cnt * 17) + 1] = { m_Points[1].Pos * test.co_shape.r + test.pos,   HITBOX_COLOR };
+			pPoints[(cnt * 17) + 2] = { m_Points[2].Pos * test.co_shape.r + test.pos,   HITBOX_COLOR };
+			pPoints[(cnt * 17) + 3] = { m_Points[3].Pos * test.co_shape.r + test.pos,   HITBOX_COLOR };
+			pPoints[(cnt * 17) + 4] = { m_Points[4].Pos * test.co_shape.r + test.pos,   HITBOX_COLOR };
+			pPoints[(cnt * 17) + 5] = { m_Points[5].Pos * test.co_shape.r + test.pos,   HITBOX_COLOR };
+			pPoints[(cnt * 17) + 6] = { m_Points[6].Pos * test.co_shape.r + test.pos,   HITBOX_COLOR };
+			pPoints[(cnt * 17) + 7] = { m_Points[7].Pos * test.co_shape.r + test.pos,   HITBOX_COLOR };
+			pPoints[(cnt * 17) + 8] = { m_Points[8].Pos * test.co_shape.r + test.pos,   HITBOX_COLOR };
+			pPoints[(cnt * 17) + 9] = { m_Points[9].Pos * test.co_shape.r + test.pos,   HITBOX_COLOR };
+			pPoints[(cnt * 17) + 10] = { m_Points[10].Pos * test.co_shape.r + test.pos, HITBOX_COLOR };
+			pPoints[(cnt * 17) + 11] = { m_Points[11].Pos * test.co_shape.r + test.pos, HITBOX_COLOR };
+			pPoints[(cnt * 17) + 12] = { m_Points[12].Pos * test.co_shape.r + test.pos, HITBOX_COLOR };
+			pPoints[(cnt * 17) + 13] = { m_Points[13].Pos * test.co_shape.r + test.pos, HITBOX_COLOR };
+			pPoints[(cnt * 17) + 14] = { m_Points[14].Pos * test.co_shape.r + test.pos, HITBOX_COLOR };
+			pPoints[(cnt * 17) + 15] = { m_Points[15].Pos * test.co_shape.r + test.pos, HITBOX_COLOR };
+			pPoints[(cnt * 17) + 16] = { m_Points[16].Pos * test.co_shape.r + test.pos, HITBOX_COLOR };
 
 		}
 #endif
@@ -158,26 +167,26 @@ void BulletManager::Draw() {
 	m_VBuffer.BindToContext(0, 0);
 	m_IBuffer.BindToContext(0, 0);
 	Clb184::g_pContext->DrawIndexed(cnt * 6, 0, 0);
+#ifdef DEBUG
 	m_Count = cnt;
+#endif
 }
 
-void BulletManager::DrawHitbox() {
 #ifdef DEBUG
-	if (m_bDebugDrawEnable) {
-		Clb184::g_pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
-		Clb184::CDefault2DShader::GetShaderInstance().BindTexturelessVertexShader();
-		Clb184::CDefault2DShader::GetShaderInstance().BindTexturelessPixelShader();
-		m_PrimBuffer.BindToContext(0, 0);
-		for (int i = 0; i < m_Count; i++) {
-			Clb184::g_pContext->Draw(17, i * 17);
-		}
+void BulletManager::DrawHitbox() {
+	Clb184::g_pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
+	Clb184::CDefault2DShader::GetShaderInstance().BindTexturelessVertexShader();
+	Clb184::CDefault2DShader::GetShaderInstance().BindTexturelessPixelShader();
+	m_PrimBuffer.BindToContext(0, 0);
+	for (int i = 0; i < m_Count; i++) {
+		Clb184::g_pContext->Draw(17, i * 17);
 	}
-#endif
 }
 
 void BulletManager::SetDebugDraw(bool state) {
 	m_bDebugDrawEnable = state;
 }
+#endif
 
 void BulletManager::SetTexture(const SQChar* name) {
 	if(false == m_BulletTexture.LoadTextureFromFile(name))
@@ -188,6 +197,6 @@ int BulletManager::GetItemCnt() const {
 	return m_TaskList.GetSize();
 }
 
-Node<Bullet>* BulletManager::CreateBullet() {
+Node<Bullet>* BulletManager::CreateObject() {
     return m_TaskList.AddFront();
 }

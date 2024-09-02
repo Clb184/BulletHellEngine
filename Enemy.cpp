@@ -5,11 +5,13 @@ static CMemoryPool<Node<Enemy>> g_TaskEnemyPool;
 EnemyManager g_EnmManager;
 
 EnemyManager::EnemyManager() :
-	m_TaskList(ENEMY_MAX, &g_TaskEnemyPool)
+	CDrawableManager<Enemy>(ENEMY_MAX, &g_TaskEnemyPool)
 {
 	m_ppTextures = new Clb184::CTexture * [ENEMY_MAX];
+#ifdef DEBUG
 	m_bDebugDrawEnable = true;
 	m_Count = 0;
+#endif
 }
 
 EnemyManager::~EnemyManager() {
@@ -23,6 +25,7 @@ void EnemyManager::Initialize() {
 		sq_pushroottable(m_VM);
 		m_ArrayObj = SQCreateArray(m_VM, _SC("____enm"), ENEMY_MAX);
 		sq_pop(m_VM, 1);
+#ifdef DEBUG
 		m_PrimBuffer.SetStrideInfo(sizeof(Clb184::Point2D));
 		m_PrimBuffer.Initialize(nullptr, sizeof(Clb184::Point2D) * 17 * ENEMY_MAX, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
 		constexpr float delta = 3.14159 / 8.0;
@@ -34,6 +37,7 @@ void EnemyManager::Initialize() {
 		}
 		m_Points[16] = m_Points[0];
 		m_Count = 0;
+#endif
 	}
 }
 
@@ -45,7 +49,9 @@ void EnemyManager::Move() {
 	Iterator<Enemy> it = *m_TaskList.GetBackIterator();
 	CollissionCircle phit = g_Player.co_shape;
 	it.MoveFront();
-	while ((pInst = it.GetData()) && pInst->active) {
+	int i = 0;
+	int max = m_TaskList.GetSize();
+	while ((pInst = it.GetData()) && pInst->active && i < max) {
 		if (pInst->life <= 0)
 			pInst->is_delete = true;
 		MoveTask(m_VM, pInst, &m_TaskList, m_ArrayObj);
@@ -54,6 +60,7 @@ void EnemyManager::Move() {
 			g_Player.Kill();
 		}
 		it.MoveFront();
+		i++;
 	}
 }
 
@@ -61,7 +68,9 @@ void EnemyManager::Draw() {
 	int cnt = 0;
 
 	if (!m_TaskList.GetSize() || !m_VM) {
+#ifdef DEBUG
 		m_Count = 0;	
+#endif
 		return;
 	}
 
@@ -117,23 +126,23 @@ void EnemyManager::Draw() {
 
 #ifdef DEBUG
 			if (m_bDebugDrawEnable) {
-				pPoints[(cnt * 17)] =      { m_Points[0].Pos  * test.co_shape.r + test.pos, 0x8c1414ff };
-				pPoints[(cnt * 17) + 1] =  { m_Points[1].Pos  * test.co_shape.r + test.pos, 0x8c1414ff };
-				pPoints[(cnt * 17) + 2] =  { m_Points[2].Pos  * test.co_shape.r + test.pos, 0x8c1414ff };
-				pPoints[(cnt * 17) + 3] =  { m_Points[3].Pos  * test.co_shape.r + test.pos, 0x8c1414ff };
-				pPoints[(cnt * 17) + 4] =  { m_Points[4].Pos  * test.co_shape.r + test.pos, 0x8c1414ff };
-				pPoints[(cnt * 17) + 5] =  { m_Points[5].Pos  * test.co_shape.r + test.pos, 0x8c1414ff };
-				pPoints[(cnt * 17) + 6] =  { m_Points[6].Pos  * test.co_shape.r + test.pos, 0x8c1414ff };
-				pPoints[(cnt * 17) + 7] =  { m_Points[7].Pos  * test.co_shape.r + test.pos, 0x8c1414ff };
-				pPoints[(cnt * 17) + 8] =  { m_Points[8].Pos  * test.co_shape.r + test.pos, 0x8c1414ff };
-				pPoints[(cnt * 17) + 9] =  { m_Points[9].Pos  * test.co_shape.r + test.pos, 0x8c1414ff };
-				pPoints[(cnt * 17) + 10] = { m_Points[10].Pos * test.co_shape.r + test.pos, 0x8c1414ff };
-				pPoints[(cnt * 17) + 11] = { m_Points[11].Pos * test.co_shape.r + test.pos, 0x8c1414ff };
-				pPoints[(cnt * 17) + 12] = { m_Points[12].Pos * test.co_shape.r + test.pos, 0x8c1414ff };
-				pPoints[(cnt * 17) + 13] = { m_Points[13].Pos * test.co_shape.r + test.pos, 0x8c1414ff };
-				pPoints[(cnt * 17) + 14] = { m_Points[14].Pos * test.co_shape.r + test.pos, 0x8c1414ff };
-				pPoints[(cnt * 17) + 15] = { m_Points[15].Pos * test.co_shape.r + test.pos, 0x8c1414ff };
-				pPoints[(cnt * 17) + 16] = { m_Points[16].Pos * test.co_shape.r + test.pos, 0x8c1414ff };
+				pPoints[(cnt * 17)] =      { m_Points[0].Pos  * test.co_shape.r + test.pos, HITBOX_COLOR };
+				pPoints[(cnt * 17) + 1] =  { m_Points[1].Pos  * test.co_shape.r + test.pos, HITBOX_COLOR };
+				pPoints[(cnt * 17) + 2] =  { m_Points[2].Pos  * test.co_shape.r + test.pos, HITBOX_COLOR };
+				pPoints[(cnt * 17) + 3] =  { m_Points[3].Pos  * test.co_shape.r + test.pos, HITBOX_COLOR };
+				pPoints[(cnt * 17) + 4] =  { m_Points[4].Pos  * test.co_shape.r + test.pos, HITBOX_COLOR };
+				pPoints[(cnt * 17) + 5] =  { m_Points[5].Pos  * test.co_shape.r + test.pos, HITBOX_COLOR };
+				pPoints[(cnt * 17) + 6] =  { m_Points[6].Pos  * test.co_shape.r + test.pos, HITBOX_COLOR };
+				pPoints[(cnt * 17) + 7] =  { m_Points[7].Pos  * test.co_shape.r + test.pos, HITBOX_COLOR };
+				pPoints[(cnt * 17) + 8] =  { m_Points[8].Pos  * test.co_shape.r + test.pos, HITBOX_COLOR };
+				pPoints[(cnt * 17) + 9] =  { m_Points[9].Pos  * test.co_shape.r + test.pos, HITBOX_COLOR };
+				pPoints[(cnt * 17) + 10] = { m_Points[10].Pos * test.co_shape.r + test.pos, HITBOX_COLOR };
+				pPoints[(cnt * 17) + 11] = { m_Points[11].Pos * test.co_shape.r + test.pos, HITBOX_COLOR };
+				pPoints[(cnt * 17) + 12] = { m_Points[12].Pos * test.co_shape.r + test.pos, HITBOX_COLOR };
+				pPoints[(cnt * 17) + 13] = { m_Points[13].Pos * test.co_shape.r + test.pos, HITBOX_COLOR };
+				pPoints[(cnt * 17) + 14] = { m_Points[14].Pos * test.co_shape.r + test.pos, HITBOX_COLOR };
+				pPoints[(cnt * 17) + 15] = { m_Points[15].Pos * test.co_shape.r + test.pos, HITBOX_COLOR };
+				pPoints[(cnt * 17) + 16] = { m_Points[16].Pos * test.co_shape.r + test.pos, HITBOX_COLOR };
 
 			}
 #endif
@@ -163,36 +172,36 @@ void EnemyManager::Draw() {
 		}
 		Clb184::g_pContext->Draw(4, i << 2);
 	}
+#ifdef DEBUG
 	m_Count = cnt;
+#endif
 }
 
 Iterator<Enemy>* EnemyManager::GetListIterator() {
 	return m_TaskList.GetBackIterator();
 }
 
+#ifdef DEBUG
 void EnemyManager::SetDebugDraw(bool state) {
 	m_bDebugDrawEnable = state;
 }
 
 void EnemyManager::DrawHitbox() {
-#ifdef DEBUG
-	if (m_bDebugDrawEnable) {
-		Clb184::g_pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
-		Clb184::CDefault2DShader::GetShaderInstance().BindTexturelessVertexShader();
-		Clb184::CDefault2DShader::GetShaderInstance().BindTexturelessPixelShader();
-		m_PrimBuffer.BindToContext(0, 0);
-		for (int i = 0; i < m_Count; i++) {
-			Clb184::g_pContext->Draw(17, i * 17);
-		}
+	Clb184::g_pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
+	Clb184::CDefault2DShader::GetShaderInstance().BindTexturelessVertexShader();
+	Clb184::CDefault2DShader::GetShaderInstance().BindTexturelessPixelShader();
+	m_PrimBuffer.BindToContext(0, 0);
+	for (int i = 0; i < m_Count; i++) {
+		Clb184::g_pContext->Draw(17, i * 17);
 	}
-#endif
 }
+#endif
 
 int EnemyManager::GetItemCnt() const {
 	return m_TaskList.GetSize();
 }
 
-Node<Enemy>* EnemyManager::CreateEnemy() {
+Node<Enemy>* EnemyManager::CreateObject() {
 	return m_TaskList.AddFront();
 }
 

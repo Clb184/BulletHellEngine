@@ -11,7 +11,7 @@ struct PlayerShot : TaskCollideableCircle {
 
 extern CMemoryPool<Node<PlayerShot>> g_TaskPlayerShotPool;
 
-class PlayerShotManager : public CDrawableManager {
+class PlayerShotManager : public CDrawableManager<PlayerShot> {
 public:
 	PlayerShotManager();
 	~PlayerShotManager();
@@ -19,21 +19,24 @@ public:
 	void Initialize();
 	void Move();
 	void Draw();
+#ifdef DEBUG
 	void DrawHitbox();
 	void SetDebugDraw(bool state);
+#endif
 	void SetTexture(const SQChar* name);
 	void SetShotVM(HSQUIRRELVM v);
 	int GetItemCnt() const;
-	Node<PlayerShot>* CreateShot();
+	Node<PlayerShot>* CreateObject();
 private:
-	CDoubleLinkedArrayList<PlayerShot> m_TaskList;
+	Clb184::CIndexBuffer m_IBuffer;
 	Clb184::CTexture m_ShotTexture;
 
+#ifdef DEBUG
 	Clb184::CVertexBuffer m_PrimBuffer;
 	glm::vec2 m_Points[17];
 	bool m_bDebugDrawEnable;
 	int m_Count;
-	HSQUIRRELVM m_VM;
+#endif
 };
 
 extern PlayerShotManager g_PlayerShotManager;
@@ -47,7 +50,7 @@ static SQInteger SetPlayerShotTexture(HSQUIRRELVM v) {
 }
 
 static Node<PlayerShot>* CreatePlayerShot() {
-	return g_PlayerShotManager.CreateShot();
+	return g_PlayerShotManager.CreateObject();
 }
 
 inline void PlayerShotMemberSetup(HSQUIRRELVM v) {

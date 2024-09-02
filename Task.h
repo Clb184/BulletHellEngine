@@ -91,7 +91,6 @@ static SQInteger Task_Constructor(HSQUIRRELVM v) {
 	};
 	SQInteger top = sq_gettop(v);
 	SQInteger numparams;
-	static HSQUIRRELVM mainv = CManagerBase::GetVM();
 
 	if (top >= 2 && (sq_gettype(v, 2) == OT_CLOSURE)) {
 		pTask = generator();
@@ -175,7 +174,9 @@ extern CMemoryPool<Node<Task>> g_TaskPool;
 extern CMemoryPool<Node<TaskDrawable2D>> g_TaskDrawable2DPool;
 extern CMemoryPool<Node<TaskDrawable3D>> g_TaskDrawable3DPool;
 
-class TaskManager : public CManagerBase {
+
+
+class TaskManager : public CManagerBase<Task> {
 public:
 	TaskManager();
 	~TaskManager();
@@ -184,10 +185,9 @@ public:
 	void Move();
 	int GetItemCnt() const;
 private:
-	CDoubleLinkedArrayList<Task> m_TaskList;
 };
 
-class Task2DManager : public CDrawableManager {
+class Task2DManager : public CDrawableManager<TaskDrawable2D> {
 public:
 	Task2DManager();
 	~Task2DManager();
@@ -197,7 +197,6 @@ public:
 	void Draw();
 
 private:
-	CDoubleLinkedArrayList<TaskDrawable2D> m_TaskList;
 };
 
 #endif

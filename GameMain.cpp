@@ -8,6 +8,11 @@ GameMain::GameMain() {
 	m_bInitialized = false;
 #ifdef DEBUG
 	m_bDebugDrawEnable = true;
+	m_LastPressedHitbox = false;
+	m_LastPressedInv = false;
+	m_LastPressedR = false;
+	m_LastPressedStats = false;
+	m_bStatDraw = true;
 #endif
 }
 
@@ -19,6 +24,7 @@ GameMain::~GameMain() {
 }
 
 void GameMain::Initialize(const char* filename) {
+	m_bInitialized = false;
 	m_VM = sq_open(2048);
 	sq_pushroottable(m_VM);
 	bool math_init = SQ_SUCCEEDED(sqstd_register_mathlib(m_VM));
@@ -36,6 +42,7 @@ void GameMain::Initialize(const char* filename) {
 	RegisterBulletClass(m_VM);
 	RegisterLinearAlgebraClass(m_VM);
 	RegisterTextureClass(m_VM);
+	RegisterAudio(m_VM);
 	sq_pop(m_VM, 1);
 	CompileMemSQScript(
 		" function wait(t) {              "
@@ -53,8 +60,10 @@ void GameMain::Initialize(const char* filename) {
 	if (m_bRunOK = CompileSQScript(filename, m_VM)) {
 		//Initialize managers
 		sq_pushroottable(m_VM);
-		CManagerBase::SetVM(m_VM);
-		CManagerBase::SetTextureClass(SQGetObjectByName(m_VM, _SC("Texture")));
+		CManagerBase<Bullet>::SetVM(m_VM);
+		CManagerBase<Bullet>::SetTextureClass(SQGetObjectByName(m_VM, _SC("Texture")));
+		CManagerBase<Enemy>::SetVM(m_VM);
+		CManagerBase<Enemy>::SetTextureClass(SQGetObjectByName(m_VM, _SC("Texture")));
 		g_EnmManager.Initialize();
 		g_BulletManager.Initialize();
 		PrintStack(m_VM);
@@ -64,8 +73,8 @@ void GameMain::Initialize(const char* filename) {
 
 		//Finally, initialize script
 		CallNPSQFunc(m_VM, "main");
-		m_Music.Load("music/STAGE_00.ogg");
-		m_Music.SetLoop(true);
+		//m_Music.Load("music/STAGE_00.ogg");
+		//m_Music.SetLoop(true);
 		//m_Music.Play(0.0f);
 		m_ScriptName = filename;
 #ifdef DEBUG
@@ -131,17 +140,19 @@ void GameMain::Draw() {
 	}
 }
 
-void GameMain::SetDebugDraw(bool state) {
-	m_bDebugDrawEnable = state;
-}
 
 bool GameMain::IsInitialized() const {
 	return m_bInitialized;
 }
 
 #ifdef DEBUG
+void GameMain::SetDebugDraw(bool state) {
+	m_bDebugDrawEnable = state;
+}
+
 void GameMain::MoveDebug() {
 	bool this_hitbox = GetAsyncKeyState(VK_F2) & 0x8000;
+	bool this_stats = GetAsyncKeyState(VK_F1) & 0x8000;
 	bool this_inv = GetAsyncKeyState(VK_F4) & 0x8000;
 	bool this_reset = GetAsyncKeyState('R') & 0x8000;
 	if (this_hitbox && !m_LastPressedHitbox) {
@@ -151,6 +162,8 @@ void GameMain::MoveDebug() {
 		g_PlayerShotManager.SetDebugDraw(m_bDebugDrawEnable);
 		g_Player.SetDebugDraw(m_bDebugDrawEnable);
 	}
+	if (this_stats && !m_LastPressedStats)
+		m_bStatDraw = !m_bStatDraw;
 	if (this_inv && !m_LastPressedInv)
 		g_Player.m_IsInvincible = !g_Player.m_IsInvincible;
 	if (this_reset && !m_LastPressedR)
@@ -172,15 +185,17 @@ void GameMain::MoveDebug() {
 	m_LastPressedInv = this_inv;
 	m_LastPressedR = this_reset;
 	m_LastPressedHitbox = this_hitbox;
+	m_LastPressedStats = this_stats;
 }
 
 void GameMain::DrawDebug() {
-	g_EnmManager.DrawHitbox();
-	g_BulletManager.DrawHitbox();
-	g_PlayerShotManager.DrawHitbox();
-	g_Player.DrawHitbox();
-
 	if (m_bDebugDrawEnable) {
+		g_EnmManager.DrawHitbox();
+		g_BulletManager.DrawHitbox();
+		g_PlayerShotManager.DrawHitbox();
+		g_Player.DrawHitbox();
+	}
+	if (m_bStatDraw) {
 		Clb184::CDefault2DShader::GetShaderInstance().SetCenter({ 0.0, 0.0 });
 		Clb184::CDefault2DShader::GetShaderInstance().UpdateMatrix();
 		D3D11_RECT rc = { 0.0, 0.0, 640.0, 480.0 };

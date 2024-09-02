@@ -97,6 +97,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <AdditionalIncludeDirectories>E:\Libraries\C++\glm;E:\Libraries\C++\squirrel\squirrel3\include;E:\BACKUP LAPTOP HDD\repos\tests\tests\ClbD3DLib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -118,6 +119,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <AdditionalIncludeDirectories>E:\Libraries\C++\glm;E:\Libraries\C++\squirrel\squirrel3\include;E:\BACKUP LAPTOP HDD\repos\tests\tests\ClbD3DLib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -139,6 +141,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <AdditionalIncludeDirectories>E:\Libraries\C++\glm;E:\Libraries\C++\squirrel\squirrel3\include;E:\BACKUP LAPTOP HDD\repos\tests\tests\ClbD3DLib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -161,6 +164,7 @@
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <AdditionalIncludeDirectories>E:\Libraries\C++\glm;E:\Libraries\C++\squirrel\squirrel3\include;E:\BACKUP LAPTOP HDD\repos\tests\tests\ClbD3DLib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -172,6 +176,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Audio.cpp" />
     <ClCompile Include="Bullet.cpp" />
     <ClCompile Include="CDrawableManager.cpp" />
     <ClCompile Include="CManagerBase.cpp" />
@@ -195,6 +200,7 @@
     <ClInclude Include="Interpolator.h" />
     <ClInclude Include="LinkedArrayList.h" />
     <ClInclude Include="MemoryPool.h" />
+    <ClInclude Include="Audio.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="PlayerShot.h" />
     <ClInclude Include="SqHandlers.h" />

@@ -104,7 +104,7 @@ SQInteger Collision_SetRadius(HSQUIRRELVM v) {
 
 
 TaskManager::TaskManager() :
-m_TaskList(TASK_MAX, &g_TaskPool) {
+CManagerBase<Task>(TASK_MAX, &g_TaskPool) {
 
 }
 
@@ -137,7 +137,7 @@ int TaskManager::GetItemCnt() const {
 }
 
 Task2DManager::Task2DManager() :
-	m_TaskList(TASK2D_MAX, &g_TaskDrawable2DPool)
+	CDrawableManager<TaskDrawable2D>(TASK2D_MAX, &g_TaskDrawable2DPool)
 {
 
 }

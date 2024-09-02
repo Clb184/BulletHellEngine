@@ -2,6 +2,8 @@ MORGAN_UNIT <- 1.0 / 1024.0;
 morgan_idle <- vec4t(0.0 * MORGAN_UNIT, 0.0, (160.0) * MORGAN_UNIT, (180.0) * MORGAN_UNIT);
 morgan_tex <- Texture("graph/morgan_pl.tga");
 
+LoadSound(0, "sound/se_shot.ogg", 3);
+
 function main() {
     local start = vec2t(0.0, 500.0);
     local y = 500.0;
@@ -20,6 +22,7 @@ function main() {
     }
     player.EnableMove(true);
     while (1){
+        PlaySound(0, player.x);
         PlayerShot(shot_test, player.x - 10.0, player.y, PI * -0.5, 22.0);
         PlayerShot(shot_test, player.x + 10.0, player.y, PI * -0.5, 22.0);
         //PlayerShot(shot_test, player.x, player.y, PI * -0.5 - 0.4, 12.0);
@@ -27,7 +30,7 @@ function main() {
         //PlayerShot(shot_test, player.x, player.y, PI * -0.5, 12.0);
         //PlayerShot(shot_test, player.x, player.y, PI * -0.5 + 0.2, 12.0);
         //PlayerShot(shot_test, player.x, player.y, PI * -0.5 + 0.4, 12.0);
-        wait(1);
+        wait(5);
     }
 }
 

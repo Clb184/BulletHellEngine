@@ -10,7 +10,7 @@ struct Bullet : TaskCollideableCircle {
 
 extern CMemoryPool<Node<Bullet>> g_TaskBulletPool;
 
-class BulletManager : public CDrawableManager {
+class BulletManager : public CDrawableManager<Bullet> {
 public:
 	BulletManager();
 	~BulletManager();
@@ -18,19 +18,23 @@ public:
 	void Initialize();
 	void Move();
 	void Draw();
+#ifdef DEBUG
 	void DrawHitbox();
 	void SetDebugDraw(bool state);
+#endif
 	void SetTexture(const SQChar* name);
 	int GetItemCnt() const;
-	Node<Bullet>* CreateBullet();
+	Node<Bullet>* CreateObject();
 private:
-	CDoubleLinkedArrayList<Bullet> m_TaskList;
+	Clb184::CIndexBuffer m_IBuffer;
 	Clb184::CTexture m_BulletTexture;
 
+#ifdef DEBUG
 	Clb184::CVertexBuffer m_PrimBuffer;
 	Clb184::Point2D m_Points[17];
 	bool m_bDebugDrawEnable;
 	int m_Count;
+#endif
 };
 
 extern BulletManager g_BulletManager;
@@ -44,7 +48,7 @@ static SQInteger SetBulletTexture(HSQUIRRELVM v) {
 }
 
 static Node<Bullet>* CreateBullet() {
-	return g_BulletManager.CreateBullet();
+	return g_BulletManager.CreateObject();
 }
 
 inline void BulletMemberSetup(HSQUIRRELVM v) {

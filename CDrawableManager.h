@@ -3,13 +3,18 @@
 #include "Graphics.h"
 #include "CManagerBase.h"
 
-class CDrawableManager : public CManagerBase {
+template<class T>
+class CDrawableManager : public CManagerBase<T> {
 public:
-	CDrawableManager();
+	CDrawableManager(size_t num_elem, CMemoryPool<Node<T>>* pMem);
 	virtual void Draw() = 0;
 protected:
 	Clb184::CVertexBuffer m_VBuffer;
-	Clb184::CIndexBuffer m_IBuffer;
 };
+template<class T>
+CDrawableManager<T>::CDrawableManager(size_t num_elem, CMemoryPool<Node<T>>* pMem) : CManagerBase<T>(num_elem, pMem) {
+	m_VBuffer.SetStrideInfo(sizeof(Clb184::Vertex2D));
+}
+
 
 #endif // !DRAWABLEMANAGER_INCLUDED

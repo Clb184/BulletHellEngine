@@ -11,7 +11,7 @@ struct Enemy : TaskCollideableCircle {
 
 extern CMemoryPool<Node<Enemy>> g_TaskEnemyPool;
 
-class EnemyManager : public CDrawableManager {
+class EnemyManager : public CDrawableManager<Enemy> {
 public:
 	EnemyManager();
 	~EnemyManager();
@@ -20,24 +20,29 @@ public:
 	void Move();
 	void Draw();
 	Iterator<Enemy>* GetListIterator();
+
+#ifdef DEBUG
 	void SetDebugDraw(bool state);
 	void DrawHitbox();
+#endif
+
 	int GetItemCnt() const;
-	Node<Enemy>* CreateEnemy();
+	Node<Enemy>* CreateObject();
 private:
-	CDoubleLinkedArrayList<Enemy> m_TaskList;
 	Clb184::CTexture** m_ppTextures;
 
+#ifdef DEBUG
 	Clb184::CVertexBuffer m_PrimBuffer;
 	Clb184::Point2D m_Points[17];
 	bool m_bDebugDrawEnable;
 	int m_Count;
+#endif
 };
 
 extern EnemyManager g_EnmManager;
 
 static Node<Enemy>* CreateEnemy() {
-	return g_EnmManager.CreateEnemy();
+	return g_EnmManager.CreateObject();
 }
 
 inline void EnmMemberSetup(HSQUIRRELVM v) {

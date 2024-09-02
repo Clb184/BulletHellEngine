@@ -7,10 +7,12 @@ PlayerShotManager g_PlayerShotManager;
 
 
 PlayerShotManager::PlayerShotManager() :
-    m_TaskList(PLAYERSHOT_MAX, &g_TaskPlayerShotPool)
+    CDrawableManager<PlayerShot>(PLAYERSHOT_MAX, &g_TaskPlayerShotPool)
 {
+#ifdef DEBUG
     m_bDebugDrawEnable = true;
     m_Count = 0;
+#endif
 }
 
 PlayerShotManager::~PlayerShotManager() {
@@ -40,6 +42,7 @@ void PlayerShotManager::Initialize(){
 		m_ArrayObj = SQCreateArray(m_VM, _SC("____sht"), PLAYERSHOT_MAX);
 		sq_pop(m_VM, 1);
 
+#ifdef DEBUG
 		m_PrimBuffer.SetStrideInfo(sizeof(Clb184::Point2D));
 		m_PrimBuffer.Initialize(nullptr, sizeof(Clb184::Point2D) * 17 * PLAYERSHOT_MAX, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
 		constexpr float delta = 3.14159 / 8.0;
@@ -50,6 +53,7 @@ void PlayerShotManager::Initialize(){
 		}
 		m_Points[16] = m_Points[0];
 		m_Count = 0;
+#endif
 	}
 }
 
@@ -87,7 +91,9 @@ void PlayerShotManager::Draw() {
 	int cnt = 0;
 
 	if (!m_TaskList.GetSize() || !m_VM) {
+#ifdef DEBUG
 		m_Count = 0;
+#endif
 		return;
 	}
 
@@ -98,12 +104,13 @@ void PlayerShotManager::Draw() {
 	Clb184::Vertex2D* pVertices = (Clb184::Vertex2D*)(m_VBuffer.Lock());
 	if (!pVertices) return;
 
+#ifdef DEBUG
 	Clb184::Point2D* pPoints = nullptr;
 	if (m_bDebugDrawEnable) {
 		pPoints = (Clb184::Point2D*)(m_PrimBuffer.Lock());
 		if (!pPoints) return;
 	}
-
+#endif
 	it.MoveFront();
 	while ((pInst = it.GetData()) && pInst->active) {
 		if (pInst->is_delete) { it.MoveFront(); continue; }
@@ -130,32 +137,36 @@ void PlayerShotManager::Draw() {
 		pVertices[(cnt << 2) + 2] = { -pos.x * c - -pos.y * s + test.pos.x, -pos.x * s + -pos.y * c + test.pos.y, color, rc.z, rc.w };
 		pVertices[(cnt << 2) + 3] = { pos.x * c - -pos.y * s + test.pos.x, pos.x * s + -pos.y * c + test.pos.y, color, rc.x, rc.w };
 
+#ifdef DEBUG
 		if (m_bDebugDrawEnable) {
-			pPoints[(cnt * 17)] = { m_Points[0] * test.co_shape.r + test.pos,       0x8c1414ff };
-			pPoints[(cnt * 17) + 1] = { m_Points[1] * test.co_shape.r + test.pos,   0x8c1414ff };
-			pPoints[(cnt * 17) + 2] = { m_Points[2] * test.co_shape.r + test.pos,   0x8c1414ff };
-			pPoints[(cnt * 17) + 3] = { m_Points[3] * test.co_shape.r + test.pos,   0x8c1414ff };
-			pPoints[(cnt * 17) + 4] = { m_Points[4] * test.co_shape.r + test.pos,   0x8c1414ff };
-			pPoints[(cnt * 17) + 5] = { m_Points[5] * test.co_shape.r + test.pos,   0x8c1414ff };
-			pPoints[(cnt * 17) + 6] = { m_Points[6] * test.co_shape.r + test.pos,   0x8c1414ff };
-			pPoints[(cnt * 17) + 7] = { m_Points[7] * test.co_shape.r + test.pos,   0x8c1414ff };
-			pPoints[(cnt * 17) + 8] = { m_Points[8] * test.co_shape.r + test.pos,   0x8c1414ff };
-			pPoints[(cnt * 17) + 9] = { m_Points[9] * test.co_shape.r + test.pos,   0x8c1414ff };
-			pPoints[(cnt * 17) + 10] = { m_Points[10] * test.co_shape.r + test.pos, 0x8c1414ff };
-			pPoints[(cnt * 17) + 11] = { m_Points[11] * test.co_shape.r + test.pos, 0x8c1414ff };
-			pPoints[(cnt * 17) + 12] = { m_Points[12] * test.co_shape.r + test.pos, 0x8c1414ff };
-			pPoints[(cnt * 17) + 13] = { m_Points[13] * test.co_shape.r + test.pos, 0x8c1414ff };
-			pPoints[(cnt * 17) + 14] = { m_Points[14] * test.co_shape.r + test.pos, 0x8c1414ff };
-			pPoints[(cnt * 17) + 15] = { m_Points[15] * test.co_shape.r + test.pos, 0x8c1414ff };
-			pPoints[(cnt * 17) + 16] = { m_Points[16] * test.co_shape.r + test.pos, 0x8c1414ff };
+			pPoints[(cnt * 17)] = { m_Points[0] * test.co_shape.r + test.pos,       HITBOX_COLOR };
+			pPoints[(cnt * 17) + 1] = { m_Points[1] * test.co_shape.r + test.pos,   HITBOX_COLOR };
+			pPoints[(cnt * 17) + 2] = { m_Points[2] * test.co_shape.r + test.pos,   HITBOX_COLOR };
+			pPoints[(cnt * 17) + 3] = { m_Points[3] * test.co_shape.r + test.pos,   HITBOX_COLOR };
+			pPoints[(cnt * 17) + 4] = { m_Points[4] * test.co_shape.r + test.pos,   HITBOX_COLOR };
+			pPoints[(cnt * 17) + 5] = { m_Points[5] * test.co_shape.r + test.pos,   HITBOX_COLOR };
+			pPoints[(cnt * 17) + 6] = { m_Points[6] * test.co_shape.r + test.pos,   HITBOX_COLOR };
+			pPoints[(cnt * 17) + 7] = { m_Points[7] * test.co_shape.r + test.pos,   HITBOX_COLOR };
+			pPoints[(cnt * 17) + 8] = { m_Points[8] * test.co_shape.r + test.pos,   HITBOX_COLOR };
+			pPoints[(cnt * 17) + 9] = { m_Points[9] * test.co_shape.r + test.pos,   HITBOX_COLOR };
+			pPoints[(cnt * 17) + 10] = { m_Points[10] * test.co_shape.r + test.pos, HITBOX_COLOR };
+			pPoints[(cnt * 17) + 11] = { m_Points[11] * test.co_shape.r + test.pos, HITBOX_COLOR };
+			pPoints[(cnt * 17) + 12] = { m_Points[12] * test.co_shape.r + test.pos, HITBOX_COLOR };
+			pPoints[(cnt * 17) + 13] = { m_Points[13] * test.co_shape.r + test.pos, HITBOX_COLOR };
+			pPoints[(cnt * 17) + 14] = { m_Points[14] * test.co_shape.r + test.pos, HITBOX_COLOR };
+			pPoints[(cnt * 17) + 15] = { m_Points[15] * test.co_shape.r + test.pos, HITBOX_COLOR };
+			pPoints[(cnt * 17) + 16] = { m_Points[16] * test.co_shape.r + test.pos, HITBOX_COLOR };
 
 		}
+#endif
 		cnt++;
 		it.MoveFront();
 	}
 	m_VBuffer.Unlock(sizeof(Clb184::Vertex2D) * 4 * cnt);
+#ifdef DEBUG
 	if (m_bDebugDrawEnable)
 		m_PrimBuffer.Unlock(sizeof(Clb184::Point2D) * 17 * cnt);
+#endif
 
 	Clb184::g_pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	Clb184::CDefault2DShader::GetShaderInstance().BindVertexShader();
@@ -164,24 +175,26 @@ void PlayerShotManager::Draw() {
 	m_VBuffer.BindToContext(0, 0);
 	m_IBuffer.BindToContext(0, 0);
 	Clb184::g_pContext->DrawIndexed(cnt * 6, 0, 0);
+#ifdef DEBUG
 	m_Count = cnt;
+#endif
 }
 
+#ifdef DEBUG
 void PlayerShotManager::DrawHitbox() {
-	if (m_bDebugDrawEnable) {
-		Clb184::g_pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
-		Clb184::CDefault2DShader::GetShaderInstance().BindTexturelessVertexShader();
-		Clb184::CDefault2DShader::GetShaderInstance().BindTexturelessPixelShader();
-		m_PrimBuffer.BindToContext(0, 0);
-		for (int i = 0; i < m_Count; i++) {
-			Clb184::g_pContext->Draw(17, i * 17);
-		}
+	Clb184::g_pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINESTRIP);
+	Clb184::CDefault2DShader::GetShaderInstance().BindTexturelessVertexShader();
+	Clb184::CDefault2DShader::GetShaderInstance().BindTexturelessPixelShader();
+	m_PrimBuffer.BindToContext(0, 0);
+	for (int i = 0; i < m_Count; i++) {
+		Clb184::g_pContext->Draw(17, i * 17);
 	}
 }
 
 void PlayerShotManager::SetDebugDraw(bool state) {
 	m_bDebugDrawEnable = state;
 }
+#endif
 
 void PlayerShotManager::SetTexture(const SQChar* name) {
 	if (false == m_ShotTexture.LoadTextureFromFile(name))
@@ -196,7 +209,7 @@ int PlayerShotManager::GetItemCnt() const {
 	return m_TaskList.GetSize();
 }
 
-Node<PlayerShot>* PlayerShotManager::CreateShot() {
+Node<PlayerShot>* PlayerShotManager::CreateObject() {
 	return m_TaskList.AddFront();
 }
 

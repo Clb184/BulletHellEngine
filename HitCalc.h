@@ -4,6 +4,8 @@
 #include <cmath>
 #include <memory>
 
+#define HITBOX_COLOR (0xffff00ff)
+
 struct CollissionShape {
 	union {
 		struct {

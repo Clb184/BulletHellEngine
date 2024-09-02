@@ -17,7 +17,6 @@ int WINAPI wWinMain(HINSTANCE current, HINSTANCE prev, LPWSTR args, int cmd) {
 	MSG Msg;
 	Clb184::CD3DWindow window;
 	Clb184::CFrameLimiter frame_limit;
-
 #ifdef DEBUG
 	static Clb184::CKeyboard kbd;
 	wrl::ComPtr<IDXGIDebug1> pDXDebug;
@@ -41,6 +40,7 @@ int WINAPI wWinMain(HINSTANCE current, HINSTANCE prev, LPWSTR args, int cmd) {
 	if (0 == Window) return -1;
 
 
+	InitAudio();
 	D3D11_DEPTH_STENCIL_DESC depthd = {};
 	depthd.DepthEnable = TRUE;
 	depthd.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
@@ -93,11 +93,8 @@ int WINAPI wWinMain(HINSTANCE current, HINSTANCE prev, LPWSTR args, int cmd) {
 	float f = 0;
 	bool sign = true;
 	Clb184::g_pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
-	std::thread __loading([&]() {
-		g_GameMain.SetPlayerScript("player/player_test.nut");
-		g_GameMain.Initialize("script/main.nut");
-		});
-	bool not_init = false;
+	g_GameMain.SetPlayerScript("player/player_test.nut");
+	g_GameMain.Initialize("script/main.nut");
 	while (1) {
 		if (PeekMessage(&Msg, NULL, 0, 0, PM_NOREMOVE)) {
 			if (!GetMessage(&Msg, NULL, 0, 0)) {
@@ -112,20 +109,8 @@ int WINAPI wWinMain(HINSTANCE current, HINSTANCE prev, LPWSTR args, int cmd) {
 				window.BindTargetView();
 				Clb184::CDefault2DShader::GetShaderInstance().BindVertexShader();
 				Clb184::CDefault2DShader::GetShaderInstance().BindPixelShader();
-				if (g_GameMain.IsInitialized() && !not_init) {
-					__loading.join();
-					not_init = true;
-				}
-				if (not_init) {
-					g_GameMain.Move();
-					g_GameMain.Draw();
-				}
-				else {
-					tex.BindToContext(0, SHADER_RESOURCE_BIND_PS);
-					sprite.SetRotation(rot);
-					sprite.Draw();
-					rot+= 0.05;
-				}
+				g_GameMain.Move();
+				g_GameMain.Draw();
 #ifdef _DEBUG
 				kbd.UpdateKeyboard();
 				if (kbd.IsKeyPressed('L'))
@@ -158,6 +143,7 @@ int WINAPI wWinMain(HINSTANCE current, HINSTANCE prev, LPWSTR args, int cmd) {
 			WaitMessage();
 		}
 	}
+	DestroyAudio();
 #ifdef DEBUG
 	HR = pDXDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_ALL);
 #endif // _DEBUG
