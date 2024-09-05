@@ -15,9 +15,9 @@ function main(){
     SetBulletTexture("graph/ball.tga");
     //print("test starting...\n");
     LoadMusic("music/plastic_space.ogg");
-    LoadMusic("music/STAGE_00.ogg");
+    LoadMusic("music/kog_09.ogg");
     //LoadMusic("music/ex_3.ogg");
-    //PlayMusic();
+    PlayMusic();
     wait(60);
     Enemy(testing, 0.0, 150.0, 20.0, sumi, vec2t(96.0, 96.0), sumi_spr);
     wait(800);
@@ -66,8 +66,8 @@ function testing(x, y, c, tex, size,  uv) {
         SetPos(vec2t(x, ny));
         if (i == 300){
             Bullet(bullet_test, x, ny, PI * 0.5, 5.0);
-            for (local j = 0; j < 2048; j++) {
-                Bullet(bullet_test, x, ny, (rand() % 360).tofloat() * 3.1415926 / 180.0, 0.1);
+            for (local j = 0; j < 60; j++) {
+                Bullet(bullet_test, x, ny, (rand() % 360).tofloat() * 3.1415926 / 180.0, 3.0);
                 //print("j: " + j + "\n");
             }
         }
@@ -85,7 +85,7 @@ function bullet_test(x, y, dir,  speed) {
     local vy = sin(dir) * speed;
     local nx = x;
     local ny = y;
-    for (local i = 0; i < 2000; i++) {
+    for (local i =  0;;i++) {
         nx += vx;
         ny += vy;
         SetPos(vec2t(nx, ny));

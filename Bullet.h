@@ -3,7 +3,7 @@
 #include "TaskDrawable2D.h"
 #include "HitCalc.h"
 
-#define BULLET_MAX (2048 * 5)
+#define BULLET_MAX (2048)
 
 struct Bullet : TaskCollideableCircle {
 };
@@ -21,13 +21,14 @@ public:
 	void DrawHitbox();
 	void SetDebugDraw(bool state);
 #endif
+	static void SetBulletLimits(const glm::vec4& lim);
 	void SetTexture(const SQChar* name);
 	int GetItemCnt() const;
 	Node<Bullet>* CreateObject();
 private:
 	Clb184::CIndexBuffer m_IBuffer;
 	Clb184::CTexture m_BulletTexture;
-
+	static glm::vec4 m_BulletLimits;
 #ifdef DEBUG
 	Clb184::CVertexBuffer m_PrimBuffer;
 	Clb184::Point2D m_Points[17];

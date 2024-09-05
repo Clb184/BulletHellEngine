@@ -25,11 +25,11 @@ function main() {
         PlaySound(0, player.x);
         PlayerShot(shot_test, player.x - 10.0, player.y, PI * -0.5, 22.0);
         PlayerShot(shot_test, player.x + 10.0, player.y, PI * -0.5, 22.0);
-        //PlayerShot(shot_test, player.x, player.y, PI * -0.5 - 0.4, 12.0);
-        //PlayerShot(shot_test, player.x, player.y, PI * -0.5 - 0.2, 12.0);
-        //PlayerShot(shot_test, player.x, player.y, PI * -0.5, 12.0);
-        //PlayerShot(shot_test, player.x, player.y, PI * -0.5 + 0.2, 12.0);
-        //PlayerShot(shot_test, player.x, player.y, PI * -0.5 + 0.4, 12.0);
+        PlayerShot(shot_test, player.x, player.y, PI * -0.5 - 0.4, 12.0);
+        PlayerShot(shot_test, player.x, player.y, PI * -0.5 - 0.2, 12.0);
+        PlayerShot(shot_test, player.x, player.y, PI * -0.5, 12.0);
+        PlayerShot(shot_test, player.x, player.y, PI * -0.5 + 0.2, 12.0);
+        PlayerShot(shot_test, player.x, player.y, PI * -0.5 + 0.4, 12.0);
         wait(5);
     }
 }

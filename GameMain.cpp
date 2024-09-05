@@ -38,6 +38,17 @@ GameMain::~GameMain() {
 	}
 }
 
+static const char* fx0 = _SC("FX0");
+static const char* ____fx0 = _SC("____f0");
+static const char* fx1 = _SC("FX1");
+static const char* ____fx1 = _SC("____f1");
+static const char* fx2 = _SC("FX2");
+static const char* ____fx2 = _SC("____f2");
+static const char* fx3 = _SC("FX3");
+static const char* ____fx3 = _SC("____f3");
+static const char* fx4 = _SC("FX4");
+static const char* ____fx4 = _SC("____f4");
+
 void GameMain::Initialize(const char* filename) {
 	m_bInitialized = false;
 	m_VM = sq_open(2048);
@@ -48,15 +59,16 @@ void GameMain::Initialize(const char* filename) {
 	sq_newclosure(m_VM, &SQErrorFunction, 0);
 	sq_seterrorhandler(m_VM);
 	sq_setprintfunc(m_VM, PrintFn, PrintFn);
-	/*
-	sq_pushstring(m_VM, _SC("____enm"), -1);
-	sq_newarray(m_VM, ENEMY_MAX);
-	sq_newslot(m_VM, -3, SQFalse);*/
 	RegisterSQFunc(m_VM, PrintCallStack, "PrintCallStack");
 	RegisterEnemyClass<&g_EnmManager>(m_VM);
 	RegisterBulletClass<&g_BulletManager>(m_VM);
 	RegisterLinearAlgebraClass(m_VM);
 	RegisterTextureClass(m_VM);
+	RegisterEffectClass<&g_FX0, Task2DListSetup0>(m_VM, _SC("FX0"));
+	RegisterEffectClass<&g_FX1, Task2DListSetup1>(m_VM, _SC("FX1"));
+	RegisterEffectClass<&g_FX2, Task2DListSetup2>(m_VM, _SC("FX2"));
+	RegisterEffectClass<&g_FX3, Task2DListSetup3>(m_VM, _SC("FX3"));
+	RegisterEffectClass<&g_FX4, Task2DListSetup4>(m_VM, _SC("FX4"));
 	RegisterAudio(m_VM);
 	sq_pop(m_VM, 1);
 	CompileMemSQScript(
@@ -79,13 +91,19 @@ void GameMain::Initialize(const char* filename) {
 		CManagerBase<Bullet>::SetTextureClass(SQGetObjectByName(m_VM, _SC("Texture")));
 		CManagerBase<Enemy>::SetVM(m_VM);
 		CManagerBase<Enemy>::SetTextureClass(SQGetObjectByName(m_VM, _SC("Texture")));
+		CManagerBase<TaskDrawable2D>::SetVM(m_VM);
+		CManagerBase<TaskDrawable2D>::SetTextureClass(SQGetObjectByName(m_VM, _SC("Texture")));
+		g_FX0.Initialize(_SC("____fx0"));
+		g_FX1.Initialize(_SC("____fx1"));
+		g_FX2.Initialize(_SC("____fx2"));
+		g_FX3.Initialize(_SC("____fx3"));
+		g_FX4.Initialize(_SC("____fx4"));
 		g_EnmManager.Initialize();
 		g_BulletManager.Initialize();
 		PrintStack(m_VM);
 		sq_pop(m_VM, 1);
 
 		g_Player.Initialize(m_PlayerScript);
-
 		//Finally, initialize script
 		CallNPSQFunc(m_VM, "main");
 		//m_Music.Load("music/STAGE_00.ogg");
@@ -120,14 +138,24 @@ void GameMain::SetPlayerScript(const SQChar* player) {
 
 void GameMain::Move() {
 	if (m_bRunOK) {
+		static bool wind = false;
+		bool this_wind = GetAsyncKeyState(VK_TAB) & 0x8000;
+		if (this_wind && !wind && Clb184::CD3DWindow::GetWindowActive())
+			Clb184::CD3DWindow::ToggleFullscreenMode();
 		sq_collectgarbage(m_VM);
 		if (sq_getvmstate(m_VM) == SQ_VMSTATE_SUSPENDED) {
 			sq_wakeupvm(m_VM, SQFalse, SQFalse, SQTrue, SQFalse);
 		}
+		g_FX0.Move();
 		g_Player.Move();
+		g_FX1.Move();
 		g_PlayerShotManager.Move();
+		g_FX2.Move();
 		g_EnmManager.Move();
+		g_FX3.Move();
 		g_BulletManager.Move();
+		g_FX4.Move();
+		wind = this_wind;
 #ifdef DEBUG
 		MoveDebug();
 #endif
@@ -143,10 +171,15 @@ void GameMain::Draw() {
 		Clb184::g_pContext->RSSetScissorRects(1, &rc);
 		Clb184::CDefault2DShader::GetShaderInstance().SetCenter({ 320.0, 0.0 });
 		Clb184::CDefault2DShader::GetShaderInstance().UpdateMatrix();
+		g_FX0.Draw();
 		g_EnmManager.Draw();
+		g_FX1.Draw();
 		g_PlayerShotManager.Draw();
+		g_FX2.Draw();
 		g_Player.Draw();
+		g_FX3.Draw();
 		g_BulletManager.Draw();
+		g_FX4.Draw();
 #ifdef DEBUG
 		DrawDebug();
 #endif
@@ -184,16 +217,26 @@ void GameMain::MoveDebug() {
 	if (this_reset && !m_LastPressedR)
 		Reset();
 	char buf[2048] = "";
-	sprintf_s(buf, 
+	sprintf_s(buf,
 		"Enemy		:%8d\n"
 		"Bullet		:%8d\n"
 		"PlayerShot	:%8d\n"
 		"Player		:%8s\n"
+		"FX0		:%8d\n"
+		"FX1		:%8d\n"
+		"FX2		:%8d\n"
+		"FX3		:%8d\n"
+		"FX4		:%8d\n"
 		"\0",
 		g_EnmManager.GetItemCnt(),
 		g_BulletManager.GetItemCnt(),
 		g_PlayerShotManager.GetItemCnt(),
-		(g_Player.m_IsInvincible || g_Player.m_MutekiTime > 0) ? "Invi" : "Vuln"
+		(g_Player.m_IsInvincible || g_Player.m_MutekiTime > 0) ? "Invi" : "Vuln",
+		g_FX0.GetItemCnt(),
+		g_FX1.GetItemCnt(),
+		g_FX2.GetItemCnt(),
+		g_FX3.GetItemCnt(),
+		g_FX4.GetItemCnt()
 	);
 	m_DebugText.SetText(buf);
 	m_DebugText.Update();

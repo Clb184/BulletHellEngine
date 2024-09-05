@@ -25,6 +25,11 @@ extern CMemoryPool<Node<Bullet>> g_TaskBulletPool;
 extern CMemoryPool<Node<Enemy>> g_TaskEnemyPool;
 
 
+extern Task2DManager g_FX0;
+extern Task2DManager g_FX1;
+extern Task2DManager g_FX2;
+extern Task2DManager g_FX3;
+extern Task2DManager g_FX4;
 extern EnemyManager g_EnmManager;
 extern Player g_Player;
 extern PlayerShotManager g_PlayerShotManager;

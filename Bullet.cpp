@@ -2,6 +2,8 @@
 #include "GameMain.h"
 #include "Player.h"
 
+glm::vec4 BulletManager::m_BulletLimits = {-240.0, -40.0, 240.0, 480.0 + 40.0};
+
 BulletManager::BulletManager() :
 	CDrawableManager<Bullet>(BULLET_MAX, &g_TaskBulletPool)
 {
@@ -37,7 +39,7 @@ void BulletManager::Initialize() {
 		sq_pushroottable(m_VM);
 		m_ArrayObj = SQCreateArray(m_VM, _SC("____blt"), BULLET_MAX);
 		sq_pop(m_VM, 1);
-
+		m_BulletLimits = { -240.0, -40.0, 240.0, 480.0 + 40.0 };
 #ifdef DEBUG
 		m_PrimBuffer.SetStrideInfo(sizeof(Clb184::Point2D));
 		m_PrimBuffer.Initialize(nullptr, sizeof(Clb184::Point2D) * 17 * BULLET_MAX, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
@@ -65,6 +67,8 @@ void BulletManager::Move() {
 	int max = m_TaskList.GetSize();
 	while ((pInst = it.GetData()) && pInst->active && i < max) {
 		//Enemy test = *pInst;
+		if (pInst->pos.x < m_BulletLimits.x || pInst->pos.x > m_BulletLimits.z || pInst->pos.y < m_BulletLimits.y || pInst->pos.y > m_BulletLimits.w)
+			pInst->is_delete = true;
 		MoveTask(m_VM, pInst, &m_TaskList, m_ArrayObj);
 		pInst->co_shape.pos = pInst->pos;
 		if (hitCheckCC(phit, pInst->co_shape)) {
@@ -185,6 +189,10 @@ void BulletManager::SetDebugDraw(bool state) {
 	m_bDebugDrawEnable = state;
 }
 #endif
+
+void BulletManager::SetBulletLimits(const glm::vec4& lim) {
+	m_BulletLimits = lim;
+}
 
 void BulletManager::SetTexture(const SQChar* name) {
 	if(false == m_BulletTexture.LoadTextureFromFile(name))

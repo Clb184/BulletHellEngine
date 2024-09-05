@@ -47,6 +47,11 @@ void Player::Initialize(const SQChar* fname) {
 	RegisterLinearAlgebraClass(m_VM);
 	RegisterTextureClass(m_VM);
 	RegisterPlayerShotClass<&g_PlayerShotManager>(m_VM);
+	RegisterEffectClass<&g_FX0, Task2DListSetup0>(m_VM, _SC("FX0"));
+	RegisterEffectClass<&g_FX1, Task2DListSetup1>(m_VM, _SC("FX1"));
+	RegisterEffectClass<&g_FX2, Task2DListSetup2>(m_VM, _SC("FX2"));
+	RegisterEffectClass<&g_FX3, Task2DListSetup3>(m_VM, _SC("FX3"));
+	RegisterEffectClass<&g_FX4, Task2DListSetup4>(m_VM, _SC("FX4"));
 	RegisterAudio(m_VM);
 	sq_pop(m_VM, 1);
 	CompileMemSQScript(
