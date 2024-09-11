@@ -17,14 +17,12 @@ Transform::~Transform() {
 void Transform::UpdateMatrix() {
 	glm::vec3 rot = this->m_Rotation;
 	glm::quat q = glm::quat();
-	glm::quat qx = glm::quat(sinf(rot.x * 0.5f), 0.0f, 0.0f, cosf(rot.x * 0.5f));
+	glm::quat qx = glm::quat(sinf(rot.z * 0.5f), 0.0f, 0.0f, cosf(rot.z * 0.5f));
 	glm::quat qy = glm::quat(0.0f, sinf(rot.y * 0.5f), 0.0f, cosf(rot.y * 0.5f));
-	glm::quat qz = glm::quat(0.0f, 0.0f, sinf(rot.z * 0.5f), cosf(rot.z * 0.5f));
+	glm::quat qz = glm::quat(0.0f, 0.0f, sinf(rot.x * 0.5f), cosf(rot.x * 0.5f));
 	q = qz * qy * qx;
 
-	this->m_ModelMatrix = glm::mat4(1.0f);
-	this->m_ModelMatrix = glm::scale(this->m_ModelMatrix, this->m_Scale);
-	this->m_ModelMatrix = glm::translate(this->m_ModelMatrix, this->m_Position) * glm::mat4(q);
+	this->m_ModelMatrix = glm::translate(glm::mat4(1.0f), this->m_Position) * glm::mat4(q)* glm::scale(glm::mat4(1.0f), this->m_Scale);
 
 	this->m_NormalMatrix = glm::inverse(this->m_ModelMatrix);
 	this->m_MatrixUniform.model = glm::transpose(this->m_ModelMatrix);

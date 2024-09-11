@@ -8,9 +8,68 @@
 #include <fcntl.h>
 #include <windows.h>
 
+#include "imgui.h"
+#include "backends/imgui_impl_win32.h"
+#include "backends/imgui_impl_dx11.h"
+
 wrl::ComPtr<ID3D11DepthStencilState> g_Draw3DState;
 
 #pragma comment(lib, "xinput.lib")
+
+
+
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK ClbProcIG(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+	static bool fullscreen = false;
+	HDC hdc;
+	PAINTSTRUCT ps;
+	HRESULT hr;
+	if (ImGui_ImplWin32_WndProcHandler(hWnd, uMsg, wParam, lParam))
+		return true;
+	// (Your code process Win32 messages)
+
+
+	switch (uMsg) {
+	case WM_ACTIVATEAPP:
+		Clb184::CD3DWindow::SetWindowState(wParam);
+		break;
+	case WM_PAINT:
+		hdc = BeginPaint(hWnd, &ps);
+		EndPaint(hWnd, &ps);
+		break;
+	case WM_SETCURSOR:
+		SetCursor(LoadCursor(NULL, IDC_ARROW));
+		return 1;
+	case WM_SIZE: {
+		wrl::ComPtr<IDXGIOutput> pOutput;
+		BOOL wind;
+		if (Clb184::g_pSwapChain) {
+			if (SUCCEEDED(Clb184::g_pSwapChain->GetFullscreenState(&wind, &pOutput))) {
+				Clb184::CD3DWindow::CleanWindowElements();
+			    hr = Clb184::g_pSwapChain->ResizeBuffers(0, LOWORD(lParam), HIWORD(lParam), DXGI_FORMAT_UNKNOWN, 0);
+				Clb184::CD3DWindow::CreateBackBuffer();
+				POINT wh = Clb184::CD3DWindow::GetWindowActualWH();
+				D3D11_VIEWPORT v;
+				v.TopLeftX = 0.0;
+				v.TopLeftY = 0.0;
+				v.Width = wh.x;
+				v.Height = wh.y;
+				v.MinDepth = 0.0;
+				v.MaxDepth = 1.0;
+				Clb184::g_pContext->RSSetViewports(1, &v);
+			}
+		}
+	}    return 1;
+
+	case WM_CLOSE:
+	case WM_DESTROY:
+		PostQuitMessage(0);
+		return 0;
+	default:
+		return DefWindowProc(hWnd, uMsg, wParam, lParam);
+	}
+}
+
 
 int WINAPI wWinMain(HINSTANCE current, HINSTANCE prev, LPWSTR args, int cmd) {
 	GameMain g_GameMain;
@@ -39,9 +98,19 @@ int WINAPI wWinMain(HINSTANCE current, HINSTANCE prev, LPWSTR args, int cmd) {
 #endif
 
 
-	Window = window.SpawnWindow(title, current, (WS_OVERLAPPEDWINDOW ^ (WS_MAXIMIZEBOX | WS_THICKFRAME)) | WS_POPUP);
+	Window = window.SpawnWindow(title, current, (WS_OVERLAPPEDWINDOW ^ (WS_MAXIMIZEBOX | WS_THICKFRAME)) | WS_POPUP, ClbProcIG);
 	if (0 == Window) return -1;
 
+	// Setup Dear ImGui context
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO();
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
+	// Setup Platform/Renderer backends
+	ImGui_ImplWin32_Init(Window);
+	ImGui_ImplDX11_Init(Clb184::g_pD3D11Device.Get(), Clb184::g_pContext.Get());
 
 	InitAudio();
 	Camera cam;
@@ -75,20 +144,21 @@ int WINAPI wWinMain(HINSTANCE current, HINSTANCE prev, LPWSTR args, int cmd) {
 	obj.LoadModel("bg/ssg_city.obj");
 
 	cam.Initialize();
-	cam.SetPos({0.0, 0.0, 10.0});
-	cam.SetFOV(3.1415926 / 6.0);
-	cam.SetFog({ 200.0,300.0 });
+	cam.SetPos({0.0, -100.0, 40.0});
+	float fov = 60.0f;
+	cam.SetRatio(4.0 / 3.0);
 	cam.UpdateMatrix();
 	Clb184::CTexture nt;
 	nt.CreateEmptyTexture(256, 256, 0xffffffff);
-	Transform tr3d;
-	tr3d.SetPosition({ 0.0,0.0,0.0 });
-	tr3d.SetScale({ 1.0,1.0, 1.0 });
-	tr3d.UpdateMatrix();
+	glm::vec3 tp[5] = {glm::vec3(0),glm::vec3(0) ,glm::vec3(0),glm::vec3(0) ,glm::vec3(0) };
+	glm::vec3 rtt[5] = {glm::vec3(0),glm::vec3(0) ,glm::vec3(0),glm::vec3(0) ,glm::vec3(0) };
+	glm::vec3 ts[5] = {glm::vec3(1),glm::vec3(1) ,glm::vec3(1),glm::vec3(1) ,glm::vec3(1) };
+	Transform tr3d[5];
 
 	Clb184::BasicWorldComposition bwc;
 	bwc.FogColor = { 1.0,1.0,0.0, 1.0};
 	bwc.Ambient = {0.1,0.1,0.1,0.0};
+	bwc.WorldLightDir = { 0.0f, 0.0f, 0.0f, 0.0f};
 	Clb184::CConstantBuffer bwcb(&bwc, sizeof(Clb184::BasicWorldComposition));
 
 
@@ -150,6 +220,9 @@ int WINAPI wWinMain(HINSTANCE current, HINSTANCE prev, LPWSTR args, int cmd) {
 	Clb184::g_pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 	g_GameMain.SetPlayerScript("player/player_test.nut");
 	g_GameMain.Initialize("script/main.nut");
+	char buff[512] = "";
+	glm::vec2 fg = { 200.0,300.0 };
+	glm::vec3 rt = {};
 	while (1) {
 		if (PeekMessage(&Msg, NULL, 0, 0, PM_NOREMOVE)) {
 			if (!GetMessage(&Msg, NULL, 0, 0)) {
@@ -162,8 +235,58 @@ int WINAPI wWinMain(HINSTANCE current, HINSTANCE prev, LPWSTR args, int cmd) {
 			if(frame_limit.IsNeedUpdate()) {
 				window.ClearWindow();
 				window.BindTargetView();
-				g_GameMain.Move();
 
+
+				if (Clb184::CD3DWindow::GetWindowActive()) {
+					if (GetAsyncKeyState('W') & 0x8000)
+						p.y += 1.0;
+					if (GetAsyncKeyState('S') & 0x8000)
+						p.y -= 1.0;
+
+					if (GetAsyncKeyState('A') & 0x8000)
+						p.x -= 1.0;
+					if (GetAsyncKeyState('D') & 0x8000)
+						p.x += 1.0;
+
+					if (GetAsyncKeyState(VK_SPACE) & 0x8000)
+						p.z += 1.0;
+					if (GetAsyncKeyState(VK_RCONTROL) & 0x8000)
+						p.z -= 1.0;
+				}
+				cam.SetFog(fg);
+				cam.SetRotation(rt);
+				cam.SetPos(p);
+				cam.SetFOV(fov * (3.14159 / 180.0));
+				cam.UpdateMatrix();
+
+				bwcb.QuickLockUnlock(&bwc, sizeof(bwc));
+				// (Your code process and dispatch Win32 messages)
+				// Start the Dear ImGui frame
+				ImGui_ImplDX11_NewFrame();
+				ImGui_ImplWin32_NewFrame();
+				ImGui::NewFrame();
+
+				ImGui::Begin("3D Manipulation");                          // Create a window called "Hello, world!" and append into it.
+				ImGui::InputText(" ", buff, sizeof(buff));
+				ImGui::SameLine();
+				if (ImGui::Button("Init Script"))
+					g_GameMain.Initialize(buff);
+				ImGui::SliderFloat("Cam FOV", &fov, 0.0f, 180.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+				ImGui::SliderFloat3("Cam Pos", &p.x, -1000.0f, 1000.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+				ImGui::SliderFloat3("Cam Rot", &rt.x, -3.1415926, 3.1415926);            // Edit 1 float using a slider from 0.0f to 1.0f
+				ImGui::SliderFloat2("Fog Pos", &fg.x, 10.0, 1000.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+				ImGui::SliderFloat3("World Light Dir", &bwc.WorldLightDir.x, -3.1415926, 3.1415926);            // Edit 1 float using a slider from 0.0f to 1.0f
+				ImGui::ColorEdit3("Ambient", &bwc.Ambient.x);            // Edit 1 float using a slider from 0.0f to 1.0f
+				ImGui::ColorEdit3("Fog", &bwc.FogColor.x);            // Edit 1 float using a slider from 0.0f to 1.0f
+				for (int i = 0; i < 1; i++) {
+					ImGui::SliderFloat3(std::string("Obj pos " + std::to_string(i)).c_str(), &tp[i].x, -1000.0f, 1000.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+					ImGui::SliderFloat3(std::string("Obj rot " + std::to_string(i)).c_str(), &rtt[i].x, -3.1415926, 3.1415926);            // Edit 1 float using a slider from 0.0f to 1.0f
+					ImGui::SliderFloat3(std::string("Obj sca " + std::to_string(i)).c_str(), &ts[i].x, -10.0f, 10.0f);            // Edit 1 float using a slider from 0.0f to 1.0f
+				}
+				ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
+				ImGui::End();
+
+				g_GameMain.Move();
 				//Testing 3D
 				v3d.BindToContext();
 				p3d.BindToContext();
@@ -171,25 +294,7 @@ int WINAPI wWinMain(HINSTANCE current, HINSTANCE prev, LPWSTR args, int cmd) {
 				vb3d.BindToContext(0, SHADER_RESOURCE_BIND_VS);
 				Clb184::g_pContext->OMSetDepthStencilState(g_Draw3DState.Get(), 1);
 
-
-				if (GetAsyncKeyState('W') & 0x8000)
-					p.y += 1.0;
-				if (GetAsyncKeyState('S') & 0x8000)
-					p.y -= 1.0;
-
-				if (GetAsyncKeyState('A') & 0x8000)
-					p.x -= 1.0;
-				if (GetAsyncKeyState('D') & 0x8000)
-					p.x += 1.0;
-
-				if (GetAsyncKeyState(VK_SPACE) & 0x8000)
-					p.z += 1.0;
-				if (GetAsyncKeyState(VK_RCONTROL) & 0x8000)
-					p.z -= 1.0;
-
-				tr3d.Bind(1);
-				cam.SetPos(p);
-				cam.UpdateMatrix();
+				tr3d[0].Bind(1);
 				cam.Bind(0);
 				nt.BindToContext(0, SHADER_RESOURCE_BIND_PS);
 				Clb184::g_pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
@@ -198,13 +303,23 @@ int WINAPI wWinMain(HINSTANCE current, HINSTANCE prev, LPWSTR args, int cmd) {
 				Clb184::g_pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 				bwcb.BindToContext(0, SHADER_RESOURCE_BIND_PS);
 				smp.BindToContext(0, SHADER_RESOURCE_BIND_PS);
-				obj.Draw();
-				nt.BindToContext(0, SHADER_RESOURCE_BIND_PS);
-
+				for (int i = 0; i < 1; i++) {
+					tr3d[i].SetPosition(tp[i]);
+					tr3d[i].SetRotation(rtt[i]);
+					tr3d[i].SetScale(ts[i]);
+					tr3d[i].UpdateMatrix();
+					tr3d[i].Bind(1);
+					obj.Draw();
+				}
 
 				Clb184::CDefault2DShader::GetShaderInstance().BindVertexShader();
 				Clb184::CDefault2DShader::GetShaderInstance().BindPixelShader();
 				g_GameMain.Draw();
+				// Rendering
+				// (Your code clears your framebuffer, renders your other stuff etc.)
+				ImGui::Render();
+				ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+				// (Your code calls swapchain's Present() function)
 #ifdef _DEBUG
 				kbd.UpdateKeyboard();
 				if (kbd.IsKeyPressed('L'))
@@ -214,7 +329,7 @@ int WINAPI wWinMain(HINSTANCE current, HINSTANCE prev, LPWSTR args, int cmd) {
 				char numbuf[8] = "";
 				sprintf_s(numbuf, "%.2f", frame_limit.GetMeanFPS());
 				D3D11_RECT rc = { 0.0, 0.0, 640.0, 480.0 };
-				Clb184::g_pContext->RSSetScissorRects(1, &rc);
+				Clb184::CD3DWindow::SetScissors(rc);
 				Clb184::g_pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 				Clb184::CDefault2DShader::GetShaderInstance().BindVertexShader();
 				Clb184::CDefault2DShader::GetShaderInstance().BindPixelShader();
@@ -237,7 +352,10 @@ int WINAPI wWinMain(HINSTANCE current, HINSTANCE prev, LPWSTR args, int cmd) {
 			WaitMessage();
 		}
 	}
-	DestroyAudio();
+	DestroyAudio(); 
+	ImGui_ImplDX11_Shutdown();
+	ImGui_ImplWin32_Shutdown();
+	ImGui::DestroyContext();
 #ifdef DEBUG
 	HR = pDXDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_ALL);
 #endif // _DEBUG

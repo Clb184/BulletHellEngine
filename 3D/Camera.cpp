@@ -6,7 +6,7 @@ Camera::Camera() {
 	this->m_ViewMat = glm::mat4(1.0f);
 	this->m_ProjMat = glm::mat4(1.0f);
 	this->m_Orientation = glm::vec3(0.0f, 1.0f, 0.0f);
-	this->m_Up = glm::vec3(0.0, 0.0, -1.0);
+	this->m_Up = glm::vec3(0.0, 0.0, 1.0);
 	this->m_Position = glm::vec3(0.0);
 	this->m_Rotation = glm::vec3(0.0);
 	this->m_Ratio = 16.0f / 9.0f;
@@ -25,14 +25,18 @@ void Camera::Initialize() {
 
 void Camera::UpdateMatrix() {
 	glm::vec3 rot = this->m_Rotation;
-	glm::mat4 view = glm::lookAt(this->m_Position, this->m_Position + this->m_Orientation, this->m_Up);
 	glm::quat q = glm::quat();
-	glm::quat qx = glm::quat(sinf(rot.x * 0.5f), 0.0f, 0.0f, cosf(rot.x * 0.5f));
+	glm::quat qx = glm::quat(sinf(rot.z * 0.5f), 0.0f, 0.0f, cosf(rot.z * 0.5f));
 	glm::quat qy = glm::quat(0.0f, sinf(rot.y * 0.5f), 0.0f, cosf(rot.y * 0.5f));
-	glm::quat qz = glm::quat(0.0f, 0.0f, sinf(rot.z * 0.5f), cosf(rot.z * 0.5f));
+	glm::quat qz = glm::quat(0.0f, 0.0f, sinf(rot.x * 0.5f), cosf(rot.x * 0.5f));
+	q = qx * qz;
+	glm::vec4 o = glm::mat4(q) * glm::vec4(m_Orientation, 1.0);
+	glm::vec3  oo = {o.x, o.y, o.z};
+	glm::vec4 u = glm::mat4(qy) * glm::vec4(m_Up, 1.0);
+	glm::vec3 uu = {u.x, u.y, u.z};
+	glm::mat4 view = glm::lookAt(this->m_Position, this->m_Position + oo, uu);
 
-	q = qz * qy * qx;
-	glm::mat4 proj = glm::perspective(this->m_FOV, this->m_Ratio, 1.0f, 1000.0f) * glm::mat4(q);
+	glm::mat4 proj = glm::perspective(this->m_FOV, this->m_Ratio, 1.0f, 1000.0f);
 
 	this->m_ViewMat = glm::transpose(view);
 	this->m_ProjMat = glm::transpose(proj);

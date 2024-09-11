@@ -156,10 +156,10 @@ void GameMain::Move() {
 		g_BulletManager.Move();
 		g_FX4.Move();
 		wind = this_wind;
-#ifdef DEBUG
-		MoveDebug();
-#endif
 	}
+#ifdef DEBUG
+	MoveDebug();
+#endif
 }
 
 void GameMain::Draw() {
@@ -168,7 +168,7 @@ void GameMain::Draw() {
 			120.0, 0.0,
 			120.0 + 400.0, 480.0
 		};
-		Clb184::g_pContext->RSSetScissorRects(1, &rc);
+		Clb184::CD3DWindow::SetScissors(rc);
 		Clb184::CDefault2DShader::GetShaderInstance().SetCenter({ 320.0, 0.0 });
 		Clb184::CDefault2DShader::GetShaderInstance().UpdateMatrix();
 		g_FX0.Draw();
@@ -180,12 +180,12 @@ void GameMain::Draw() {
 		g_FX3.Draw();
 		g_BulletManager.Draw();
 		g_FX4.Draw();
-#ifdef DEBUG
-		DrawDebug();
-#endif
-		Clb184::CDefault2DShader::GetShaderInstance().SetCenter({ 0.0, 0.0 });
-		Clb184::CDefault2DShader::GetShaderInstance().UpdateMatrix();
 	}
+#ifdef DEBUG
+	DrawDebug();
+#endif
+	Clb184::CDefault2DShader::GetShaderInstance().SetCenter({ 0.0, 0.0 });
+	Clb184::CDefault2DShader::GetShaderInstance().UpdateMatrix();
 }
 
 
@@ -203,19 +203,20 @@ void GameMain::MoveDebug() {
 	bool this_stats = GetAsyncKeyState(VK_F1) & 0x8000;
 	bool this_inv = GetAsyncKeyState(VK_F4) & 0x8000;
 	bool this_reset = GetAsyncKeyState('R') & 0x8000;
-	if (this_hitbox && !m_LastPressedHitbox) {
-		m_bDebugDrawEnable = !m_bDebugDrawEnable;
-		g_EnmManager.SetDebugDraw(m_bDebugDrawEnable);
-		g_BulletManager.SetDebugDraw(m_bDebugDrawEnable);
-		g_PlayerShotManager.SetDebugDraw(m_bDebugDrawEnable);
-		g_Player.SetDebugDraw(m_bDebugDrawEnable);
-	}
-	if (this_stats && !m_LastPressedStats)
-		m_bStatDraw = !m_bStatDraw;
-	if (this_inv && !m_LastPressedInv)
-		g_Player.m_IsInvincible = !g_Player.m_IsInvincible;
-	if (this_reset && !m_LastPressedR)
-		Reset();
+	if (Clb184::CD3DWindow::GetWindowActive()) {
+		if (this_hitbox && !m_LastPressedHitbox) {
+			m_bDebugDrawEnable = !m_bDebugDrawEnable;
+			g_EnmManager.SetDebugDraw(m_bDebugDrawEnable);
+			g_BulletManager.SetDebugDraw(m_bDebugDrawEnable);
+			g_PlayerShotManager.SetDebugDraw(m_bDebugDrawEnable);
+			g_Player.SetDebugDraw(m_bDebugDrawEnable);
+		}
+		if (this_stats && !m_LastPressedStats)
+			m_bStatDraw = !m_bStatDraw;
+		if (this_inv && !m_LastPressedInv)
+			g_Player.m_IsInvincible = !g_Player.m_IsInvincible;
+		if (this_reset && !m_LastPressedR)
+			Reset();
 	char buf[2048] = "";
 	sprintf_s(buf,
 		"Enemy		:%8d\n"
@@ -244,6 +245,7 @@ void GameMain::MoveDebug() {
 	m_LastPressedR = this_reset;
 	m_LastPressedHitbox = this_hitbox;
 	m_LastPressedStats = this_stats;
+	}
 }
 
 void GameMain::DrawDebug() {
@@ -257,7 +259,7 @@ void GameMain::DrawDebug() {
 		Clb184::CDefault2DShader::GetShaderInstance().SetCenter({ 0.0, 0.0 });
 		Clb184::CDefault2DShader::GetShaderInstance().UpdateMatrix();
 		D3D11_RECT rc = { 0.0, 0.0, 640.0, 480.0 };
-		Clb184::g_pContext->RSSetScissorRects(1, &rc);
+		Clb184::CD3DWindow::SetScissors(rc);
 		Clb184::g_pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 		Clb184::CDefault2DShader::GetShaderInstance().BindVertexShader();
 		Clb184::CDefault2DShader::GetShaderInstance().BindPixelShader();

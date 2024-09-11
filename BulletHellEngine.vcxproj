@@ -96,7 +96,7 @@
       <ControlFlowGuard>false</ControlFlowGuard>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
-      <AdditionalIncludeDirectories>E:\Libraries\C++\glm;E:\Libraries\C++\squirrel\squirrel3\include;E:\BACKUP LAPTOP HDD\repos\tests\tests\ClbD3DLib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>E:\Libraries\C++\glm;E:\Libraries\C++\squirrel\squirrel3\include;E:\BACKUP LAPTOP HDD\repos\tests\tests\ClbD3DLib;E:\BACKUP LAPTOP HDD\repos\BulletHellEngine\imgui-1.91.1;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
@@ -118,7 +118,7 @@
       <ControlFlowGuard>false</ControlFlowGuard>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
-      <AdditionalIncludeDirectories>E:\Libraries\C++\glm;E:\Libraries\C++\squirrel\squirrel3\include;E:\BACKUP LAPTOP HDD\repos\tests\tests\ClbD3DLib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>E:\Libraries\C++\glm;E:\Libraries\C++\squirrel\squirrel3\include;E:\BACKUP LAPTOP HDD\repos\tests\tests\ClbD3DLib;E:\BACKUP LAPTOP HDD\repos\BulletHellEngine\imgui-1.91.1;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
@@ -140,7 +140,7 @@
       <ControlFlowGuard>false</ControlFlowGuard>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
-      <AdditionalIncludeDirectories>E:\Libraries\C++\glm;E:\Libraries\C++\squirrel\squirrel3\include;E:\BACKUP LAPTOP HDD\repos\tests\tests\ClbD3DLib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>E:\Libraries\C++\glm;E:\Libraries\C++\squirrel\squirrel3\include;E:\BACKUP LAPTOP HDD\repos\tests\tests\ClbD3DLib;E:\BACKUP LAPTOP HDD\repos\BulletHellEngine\imgui-1.91.1;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
@@ -162,7 +162,7 @@
       <ControlFlowGuard>false</ControlFlowGuard>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
-      <AdditionalIncludeDirectories>E:\Libraries\C++\glm;E:\Libraries\C++\squirrel\squirrel3\include;E:\BACKUP LAPTOP HDD\repos\tests\tests\ClbD3DLib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>E:\Libraries\C++\glm;E:\Libraries\C++\squirrel\squirrel3\include;E:\BACKUP LAPTOP HDD\repos\tests\tests\ClbD3DLib;E:\BACKUP LAPTOP HDD\repos\BulletHellEngine\imgui-1.91.1;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
@@ -191,6 +191,13 @@
     <ClCompile Include="CManagerBase.cpp" />
     <ClCompile Include="Enemy.cpp" />
     <ClCompile Include="GameMain.cpp" />
+    <ClCompile Include="imgui-1.91.1\backends\imgui_impl_dx11.cpp" />
+    <ClCompile Include="imgui-1.91.1\backends\imgui_impl_win32.cpp" />
+    <ClCompile Include="imgui-1.91.1\imgui.cpp" />
+    <ClCompile Include="imgui-1.91.1\imgui_demo.cpp" />
+    <ClCompile Include="imgui-1.91.1\imgui_draw.cpp" />
+    <ClCompile Include="imgui-1.91.1\imgui_tables.cpp" />
+    <ClCompile Include="imgui-1.91.1\imgui_widgets.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="PlayerShot.cpp" />
     <ClCompile Include="SqHandlers.cpp" />
@@ -216,6 +223,14 @@
     <ClInclude Include="GameMain.h" />
     <ClInclude Include="Graphics.h" />
     <ClInclude Include="CManagerBase.h" />
+    <ClInclude Include="imgui-1.91.1\backends\imgui_impl_dx11.h" />
+    <ClInclude Include="imgui-1.91.1\backends\imgui_impl_win32.h" />
+    <ClInclude Include="imgui-1.91.1\imconfig.h" />
+    <ClInclude Include="imgui-1.91.1\imgui.h" />
+    <ClInclude Include="imgui-1.91.1\imgui_internal.h" />
+    <ClInclude Include="imgui-1.91.1\imstb_rectpack.h" />
+    <ClInclude Include="imgui-1.91.1\imstb_textedit.h" />
+    <ClInclude Include="imgui-1.91.1\imstb_truetype.h" />
     <ClInclude Include="Interpolator.h" />
     <ClInclude Include="LinkedArrayList.h" />
     <ClInclude Include="MemoryPool.h" />

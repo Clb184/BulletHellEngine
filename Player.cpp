@@ -130,7 +130,7 @@ constexpr int deadzone = (16000) * (16000);
 
 void Player::Move() {
 	if (!m_bRunOK) return;
-	if (m_bEnableMove) {
+	if (m_bEnableMove && Clb184::CD3DWindow::GetWindowActive()) {
 		bool enablex = false;
 		bool enabley = false;
 		float dx = 0.0f;
