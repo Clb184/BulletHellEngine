@@ -23,7 +23,7 @@ void Transform::UpdateMatrix() {
 	q = qz * qy * qx;
 	glm::vec3 ps = -m_Position;
 	ps.z = -ps.z;
-	this->m_ModelMatrix = glm::translate(glm::mat4(1.0f), ps) * glm::mat4(q)* glm::scale(glm::mat4(1.0f), this->m_Scale);
+	this->m_ModelMatrix = glm::translate(glm::mat4(1.0f), this->m_Position) * glm::mat4(q)* glm::scale(glm::mat4(1.0f), this->m_Scale);
 
 	this->m_NormalMatrix = glm::inverse(this->m_ModelMatrix);
 	this->m_MatrixUniform.model = glm::transpose(this->m_ModelMatrix);

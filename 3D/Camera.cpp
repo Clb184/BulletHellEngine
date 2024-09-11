@@ -31,10 +31,12 @@ void Camera::UpdateMatrix() {
 	glm::quat qz = glm::quat(0.0f, 0.0f, sinf(rot.x * 0.5f), cosf(rot.x * 0.5f));
 	q = qx * qz;
 	glm::vec4 o = glm::mat4(q) * glm::vec4(m_Orientation, 1.0);
-	glm::vec3  oo = {o.x, o.y, o.z};
+	glm::vec3  oo = {-o.x, -o.y, o.z};
 	glm::vec4 u = glm::mat4(qy) * glm::vec4(m_Up, 1.0);
 	glm::vec3 uu = {u.x, u.y, u.z};
-	glm::mat4 view = glm::lookAt(this->m_Position, this->m_Position + oo, uu);
+	glm::vec3 ps = -m_Position;
+	ps.z = -ps.z;
+	glm::mat4 view = glm::lookAt(ps, ps + oo, uu);
 
 	glm::mat4 proj = glm::perspective(this->m_FOV, this->m_Ratio, 1.0f, 1000.0f);
 
